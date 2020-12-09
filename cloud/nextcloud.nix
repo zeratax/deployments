@@ -2,17 +2,12 @@
 
 let
 
-in rec {
+in {
     deployment.keys.storage-box-webdav-pass.text = builtins.readFile ./storage-box-webdav-pass.key;
-    deployment.keys.nextcloud-db-pass.text = builtins.readFile ./nextcloud-db-pass.key;
-    deployment.keys.nextcloud-db-pass.user = "nextcloud";
-    deployment.keys.nextcloud-db-pass.group = "nextcloud";
-    deployment.keys.nextcloud-admin-pass.text = builtins.readFile ./nextcloud-admin-pass.key;
-    deployment.keys.nextcloud-admin-pass.user = "nextcloud";
-    deployment.keys.nextcloud-admin-pass.group = "nextcloud";
-    
-    services.davfs2.enable = true;
     environment.etc."davfs2/secrets".source = "/run/keys/storage-box-webdav-pass";
+
+    services.davfs2.enable = true;
+    
     fileSystems."/var/lib/nextcloud/data" = {
         device = lib.head (builtins.split " " (builtins.readFile ./storage-box-webdav-pass.key));
         fsType = "davfs";
@@ -23,7 +18,14 @@ in rec {
             "_netdev" # device requires network 
         ];
     };
-    # ln -s /run/keys/storage-box-webdav-pass /etc/davfs2/secrets
+
+    deployment.keys.nextcloud-db-pass.text = builtins.readFile ./nextcloud-db-pass.key;
+    deployment.keys.nextcloud-db-pass.user = "nextcloud";
+    deployment.keys.nextcloud-db-pass.group = "nextcloud";
+    deployment.keys.nextcloud-admin-pass.text = builtins.readFile ./nextcloud-admin-pass.key;
+    deployment.keys.nextcloud-admin-pass.user = "nextcloud";
+    deployment.keys.nextcloud-admin-pass.group = "nextcloud";
+    users.users.nextcloud.extraGroups = [ config.users.groups.keys.name ];
 
     services.nextcloud = {
         enable = true;
@@ -48,9 +50,9 @@ in rec {
             dbuser = "nextcloud";
             dbhost = "/run/postgresql"; # nextcloud will add /.s.PGSQL.5432 by itself
             dbname = "nextcloud";
-            dbpassFile = "/var/nextcloud-db-pass";
+            dbpassFile = "/run/keys/nextcloud-db-pass";
 
-            adminpassFile = "/var/nextcloud-admin-pass";
+            adminpassFile = "/run/keys/nextcloud-admin-pass";
             adminuser = "admin";
         };
     };
