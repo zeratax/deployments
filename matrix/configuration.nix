@@ -3,7 +3,7 @@
   cloud =
     { config, pkgs, ... }:
     { 
-        deployment.targetHost = "49.12.106.164";
+        deployment.targetHost = "165.227.167.178";
 
         imports = [
             ../providers/digitalocean.nix
