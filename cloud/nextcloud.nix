@@ -4,12 +4,12 @@ let
 
 in {
     deployment.keys.storage-box-webdav-pass.text = builtins.readFile ./storage-box-webdav-pass.key;
-    environment.etc."davfs2/secrets".source = "/run/keys/storage-box-webdav-pass";
+    environment.etc."davfs2/secrets".source = config.deployment.keys.storage-box-webdav-pass.path;
 
     services.davfs2.enable = true;
     
     fileSystems."/var/lib/nextcloud/data" = {
-        device = lib.head (builtins.split " " (builtins.readFile ./storage-box-webdav-pass.key));
+        device = lib.head (builtins.split " " config.deployment.keys.storage-box-webdav-pass.text);
         fsType = "davfs";
         options = [
             "gid=998" # id -g nextcloud
@@ -56,14 +56,14 @@ in {
             dbuser = "nextcloud";
             dbhost = "/run/postgresql"; # nextcloud will add /.s.PGSQL.5432 by itself
             dbname = "nextcloud";
-            dbpassFile = "/run/keys/nextcloud-db-pass";
+            dbpassFile = config.deployment.keys.nextcloud-db-pass.path;
 
-            adminpassFile = "/run/keys/nextcloud-admin-pass";
+            adminpassFile = config.deployment.keys.nextcloud-admin-pass.path;
             adminuser = "admin";
         };
     };
 
-    services.nginx.virtualHosts."${networking.domain}" = {
+    services.nginx.virtualHosts."${config.networking.domain}" = {
         forceSSL = true;
         enableACME = true;
     };
