@@ -27,6 +27,12 @@ in {
     deployment.keys.nextcloud-admin-pass.group = "nextcloud";
     users.users.nextcloud.extraGroups = [ config.users.groups.keys.name ];
 
+
+    networking.firewall = {
+        allowedTCPPorts = [ 80 443 ];
+        allowPing = true;
+    };
+
     services.nextcloud = {
         enable = true;
         hostName = config.networking.domain;
@@ -57,7 +63,7 @@ in {
         };
     };
 
-    services.nginx.virtualHosts."cloud.dmnd.sh" = {
+    services.nginx.virtualHosts."${networking.domain}" = {
         forceSSL = true;
         enableACME = true;
     };

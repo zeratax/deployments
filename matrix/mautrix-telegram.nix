@@ -7,9 +7,11 @@ let
       join = hostName: domain: hostName + lib.strings.optionalString (domain != null) ".${domain}";
     in join config.networking.hostName config.networking.domain;
 in {
+  deployment.keys.mautrix-telegram-secrets.text = builtins.readFile ./mautrix-telegram-secrets.key;
+
   services.mautrix-telegram = {
     enable = true;
-    environmentFile = /etc/secrets/mautrix-telegram.env; # file containing the appservice and telegram tokens
+    environmentFile = /run/keys/mautrix-telegram-secrets;
     settings = {
       homeserver = {
         address = "http://localhost:8008";
@@ -19,7 +21,6 @@ in {
         provisioning = {
           enabled = true;
           prefix = "/_matrix/appservice-telegram/provision";
-          shared_secret = builtins.readFile ./mautrix-shared-secret.key;
         };
         id = "telegram";
         public = {
