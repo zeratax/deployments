@@ -43,7 +43,6 @@ in {
       User = "postgres";
       Type = "oneshot";
     };
-    serviceConfig.Type = "oneshot";
     script = ''
       ${pkgs.awscli}/bin/aws s3 cp \
         "s3://$AWS_BACKUP_BUCKET/cloud-backup.$BACKUP_DATE.dump" \
