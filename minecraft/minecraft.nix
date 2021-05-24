@@ -11,6 +11,7 @@ let
   plugins = config.services.bukkit-plugins.plugins;
   dynmap-defaults = import ./plugin-settings/dynmap.nix { };
   harbor-defaults = import ./plugin-settings/harbor.nix { };
+  paper-defaults = import ./plugin-settings/paper.nix { };
 
   # this seems dumb
   mcVersion = "1.16.5";
@@ -29,7 +30,10 @@ let
   });
 in
 {
-  imports = [ nur-pkgs.repos.zeratax.modules.bukkit-plugins ];
+  imports = [ 
+    nur-pkgs.repos.zeratax.modules.bukkit-plugins
+    nur-pkgs.repos.zeratax.modules.bukkit-server
+  ];
 
   # open ports to host e.g. a dynmap
   networking.firewall = {
@@ -37,7 +41,7 @@ in
     allowPing = true;
   };
 
-  services.minecraft-server = {
+  services.bukkit-server = {
     enable = true;
     declarative = true;
     eula = true;
@@ -64,6 +68,14 @@ in
       motd = "a weak diamond is no diamond at all";
       enable-query = true;
     };
+
+    additionalSettingsFiles = {
+      "paper.yml" = recursiveUpdate paper-defaults {
+        settings.unsupported-settings = {
+          allow-permanent-block-break-exploits = true;
+        };
+      };
+    };
   };
 
   services.bukkit-plugins = {
@@ -81,7 +93,7 @@ in
       dynmap = {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.dynmap;
         settings = recursiveUpdate dynmap-defaults {
-          # overwrite values here
+          # overwrite defaults here
         };
       };
     };
@@ -102,7 +114,6 @@ in
       Group = config.users.groups.minecraft.name;
     };
   };
-
 
 
   services.nginx = {
