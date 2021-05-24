@@ -47,6 +47,8 @@ in {
         # Set what time makes sense for you
         autoUpdateApps.startAt = "05:00:00";
 
+        package = pkgs.nextcloud21;
+
         config = {
             # Further forces Nextcloud to use HTTPS
             overwriteProtocol = "https";
@@ -60,6 +62,8 @@ in {
 
             adminpassFile = config.deployment.keys.nextcloud-admin-pass.path;
             adminuser = "admin";
+
+            defaultPhoneRegion = "DE";
         };
     };
 

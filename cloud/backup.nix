@@ -22,8 +22,7 @@ in {
       -r "${ssh-fingerprint}" | \
     ${pkgs.awscli}/bin/aws s3 cp \
       - \
-      "s3://$AWS_BACKUP_BUCKET/cloud-backup.$today.dump" \
-      --expires $expire
+      "s3://$AWS_BACKUP_BUCKET/cloud-backup.$today.dump"
     '';
   };
 
