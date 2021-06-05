@@ -55,7 +55,7 @@ in
 
     package = pkgs.nextcloud21;
 
-    maxUploadSize = "10g";
+    maxUploadSize = "10G";
 
     config = {
       # Further forces Nextcloud to use HTTPS
@@ -76,7 +76,7 @@ in
 
     poolSettings = {
       "pm" = "dynamic";
-      "pm.max_children" = "32";
+      "pm.max_children" = "64";
       "pm.start_servers" = "7";
       "pm.min_spare_servers" = "7";
       "pm.max_spare_servers" = "14";
