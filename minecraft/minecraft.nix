@@ -21,7 +21,6 @@ let
     sha256 = "07zgq6pfgwd9a9daqv1dab0q8cwgidsn6sszn7bpr37y457a4ka8";
   };
   newpapermc = pkgs.papermc.overrideAttrs (old: {
-
     version = "${mcVersion}r${buildNum}";
     installPhase = ''
       install -Dm444 ${jar} $out/share/papermc/papermc.jar
