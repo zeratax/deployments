@@ -10,6 +10,7 @@ let
 
   plugins = config.services.bukkit-plugins.plugins;
   dynmap-defaults = import ./plugin-settings/dynmap.nix { };
+  discordsrv-defaults = import ./plugin-settings/discordsrv.nix { };
   harbor-defaults = import ./plugin-settings/harbor.nix { };
   paper-defaults = import ./plugin-settings/paper.nix { };
 
@@ -92,15 +93,33 @@ in
         package = nur-pkgs.repos.zeratax.bukkitPlugins.harbor;
         settings = recursiveUpdate harbor-defaults {
           # overwrite defaults here
-          "Harbor/config.yml" = {
-            version = plugins.harbor.package.version;
-          };
         };
       };
       dynmap = {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.dynmap;
         settings = recursiveUpdate dynmap-defaults {
           # overwrite defaults here
+        };
+      };
+      discordsrv = {
+        package = nur-pkgs.repos.zeratax.bukkitPlugins.discordsrv;
+        settings = recursiveUpdate discordsrv-defaults {
+          "DiscordSRV/config.yml" = {
+            BotToken = builtins.readFile ./bot-token.key;
+            Channels = {
+              global = "189775065116573696";
+            };
+            DiscordCannedResponses = {
+              "!ip" = "mc.dmnd.sh";
+              "!site" = "http://dmnd.sh";
+            };
+            Experiment_WebhookChatMessageDelivery = true;
+            UseModernPaperChatEvent = true;
+            DiscordChatChannelRolesAllowedToUseColorCodesInChat = [
+              "Gems"
+            ];
+            ChannelTopicUpdaterChannelTopicsAtShutdownEnabled = false;
+          };
         };
       };
     };
@@ -114,7 +133,7 @@ in
     ];
   };
 
-  systemd.services.minecraft-server = {
+  systemd.services.bukkit-server = {
     serviceConfig = {
       Group = config.users.groups.minecraft.name;
     };
