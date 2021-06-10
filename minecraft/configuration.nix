@@ -10,6 +10,7 @@
             ../common/ssh.nix
             ../common/lets-encrypt.nix
             # ./networking.nix
+            ./backup.nix
             ./minecraft.nix
         ];
 

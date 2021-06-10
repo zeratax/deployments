@@ -4,7 +4,7 @@ let
   nur-pkgs = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
     inherit pkgs;
     repoOverrides = {
-      zeratax = import /home/kaine/git/nur-packages { inherit pkgs; };
+      zeratax = if builtins.pathExists ~/git/nur-packages then import ~/git/nur-packages { inherit pkgs; } else null;
     };
   };
 
@@ -29,7 +29,7 @@ let
   });
 in
 {
-  imports = [ 
+  imports = [
     nur-pkgs.repos.zeratax.modules.bukkit-plugins
     nur-pkgs.repos.zeratax.modules.bukkit-server
   ];
@@ -48,24 +48,31 @@ in
     package = newpapermc; # unstable uses a too recent version of java
 
     serverProperties = {
-      spawn-protection = 0;
-      max-tick-time = 60000;
       server-name = "DIAMONDS";
+      level-name = "antarcticite";
+      level-type = "default";
+      motd = "a weak diamond is no diamond at all";
+
       gamemode = "survival";
-      broadcast-console-to-ops = true;
       difficulty = "hard";
       spawn-monsters = true;
-      broadcast-rcon-to-ops = true;
-      op-permission-level = 4;
       pvp = true;
-      level-type = "default";
       hardcore = false;
-      max-players = 20;
-      level-name = "antarcticite";
-      view-distance = 7;
-      online-mode = true;
-      motd = "a weak diamond is no diamond at all";
+
+      spawn-protection = 0;
+      max-tick-time = 60000;
+
       enable-query = true;
+      enable-rcon = true;
+      "rcon.port" = 25575;
+      "rcon.password" = builtins.readFile ./rcon-password.key;
+      broadcast-rcon-to-ops = true;
+      broadcast-console-to-ops = true;
+      op-permission-level = 4;
+
+      view-distance = 7;
+      max-players = 20;
+      online-mode = true;
     };
 
     additionalSettingsFiles = {
@@ -86,7 +93,7 @@ in
         settings = recursiveUpdate harbor-defaults {
           # overwrite defaults here
           "Harbor/config.yml" = {
-            version =  plugins.harbor.package.version;
+            version = plugins.harbor.package.version;
           };
         };
       };
@@ -100,21 +107,18 @@ in
   };
 
   # create a group minecraft, so that nginx can read files
-  users.groups.minecraft = {};
-  users.users = {
-    minecraft = {
-      group = config.users.groups.minecraft.name;
-    };
-    nginx = {
-      extraGroups = [ config.users.groups.minecraft.name ];
-    };
+  users.groups.minecraft = {
+    members = [
+      config.users.users.minecraft.name
+      config.services.nginx.user
+    ];
   };
+
   systemd.services.minecraft-server = {
     serviceConfig = {
       Group = config.users.groups.minecraft.name;
     };
   };
-
 
   services.nginx = {
     enable = true;
