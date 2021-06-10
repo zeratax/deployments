@@ -106,6 +106,7 @@ in
         settings = recursiveUpdate discordsrv-defaults {
           "DiscordSRV/config.yml" = {
             BotToken = builtins.readFile ./bot-token.key;
+            AvatarUrl = "https://crafatar.com/renders/head/{uuid-nodashes}.png?size={size}&overlay#{texture}";
             Channels = {
               global = "189775065116573696";
             };
