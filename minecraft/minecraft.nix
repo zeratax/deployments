@@ -3,9 +3,9 @@ with lib;
 let
   nur-pkgs = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
     inherit pkgs;
-    repoOverrides = if builtins.pathExists ~/git/nur-packages then {
-      zeratax = import ~/git/nur-packages { inherit pkgs; } ;
-    } else { };
+    repoOverrides = {} // optionalAttrs builtins.pathExists ~/git/nur-packages {
+      zeratax = import ~/git/nur-packages {};
+    };
   };
 
   plugins = config.services.bukkit-plugins.plugins;

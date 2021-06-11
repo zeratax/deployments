@@ -5,7 +5,7 @@ set -u
 set -x
 
 # configure this!
-hostname="gestalt"
+hostname=""
 password=""
 diskdev=/dev/sda
 bootpart=/dev/sda1
@@ -52,7 +52,7 @@ done
 cat << EOF > /mnt/etc/nixos/configuration.nix
    {
         imports =
-        [ # Include the results of the hardware scan.
+        [
           ./hardware-configuration.nix
         ];
 
@@ -75,11 +75,8 @@ cat << EOF > /mnt/etc/nixos/configuration.nix
         environment.systemPackages = with pkgs; [
             curl
             firefox
-            gcc
             git
             ntfs3g
-            python2
-            python3
         ];
 
         services.openssh.enable = true;
@@ -90,10 +87,6 @@ cat << EOF > /mnt/etc/nixos/configuration.nix
 
         services.cron.mailto = "root";
 
-        # This value determines the NixOS release with which your system is to be
-        # compatible, in order to avoid breaking some software such as database
-        # servers. You should change this only after NixOS release notes say you
-        # should.
         system.stateVersion = "20.03"; # Did you read the comment?
     }
 EOF
