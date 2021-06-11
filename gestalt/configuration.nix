@@ -53,7 +53,7 @@ in
   };
 
   ################### Networking ###################
-  networking.hostName = "gestalt"; 
+  networking.hostName = "gestalt";
   networking.networkmanager.enable = true;
 
   networking.useDHCP = false;
@@ -128,15 +128,14 @@ in
   ];
   services.mullvad-vpn.enable = true;
 
-  # Enable color calibration
-  services.colord.enable = lib.mkIf config.services.xserver.enable true;
-  services.pcscd.enable = lib.mkIf config.services.xserver.enable true;
-
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
+
+  # Enable keyring cos stuff like vscode uses it
+  services.gnome.gnome-keyring.enable = true;
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
@@ -148,6 +147,7 @@ in
     "nvidia"
   ];
 
+  ################### X Server Stuff ###################
   # Enable the KDE Desktop Environment.
   services.xserver.displayManager.sddm.enable = true;
   services.xserver.desktopManager.plasma5.enable = true;
@@ -157,6 +157,10 @@ in
   services.xserver.windowManager.i3.enable = true;
   services.xserver.displayManager.defaultSession = "plasma";
 
+  # Enable color calibration
+  services.colord.enable = lib.mkIf config.services.xserver.enable true;
+  services.pcscd.enable = lib.mkIf config.services.xserver.enable true;
+
   users.users.kaine = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" "docker" ];
@@ -165,4 +169,5 @@ in
     ];
   };
   system.stateVersion = "21.05"; # Did you read the comment?
+
 }

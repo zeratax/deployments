@@ -1,4 +1,4 @@
-{ pkgs, config, lib, stdenv, ... }:
+{ pkgs, config, lib, ... }:
 with lib;
 let
   nur-pkgs = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
