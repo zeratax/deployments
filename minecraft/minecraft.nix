@@ -71,7 +71,7 @@ in
       broadcast-console-to-ops = true;
       op-permission-level = 4;
 
-      view-distance = 7;
+      view-distance = 16;
       max-players = 20;
       online-mode = true;
     };
