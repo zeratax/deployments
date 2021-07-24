@@ -30,6 +30,20 @@ let
     dontConfigure = true;
     installPhase = "mkdir -p $out; cp -R * $out/";
   };
+  plugin-pagelist = pkgs.stdenv.mkDerivation rec {
+    name = "pagelist";
+
+    src = pkgs.fetchFromGitHub {
+      owner = "dokufreaks";
+      repo = "plugin-pagelist";
+      rev = "f07f56614330356190d44d26dd55e22718683433";
+      sha256 = "04i833nqljghrq6iv2lnvksbbqbsykvnbb4j7rhgd9kyk9jaxbzs";
+    };
+
+    preferLocalBuild = true;
+    dontConfigure = true;
+    installPhase = "mkdir -p $out; cp -R * $out/";
+  };
 in
 {
   deployment.keys.dokuwiki-users.text = builtins.readFile ./dokuwiki-users.key;
@@ -77,7 +91,11 @@ in
       ${builtins.readFile ./dokuwiki-smtp.key} 
     '';
 
-    plugins = [ plugin-smtp plugin-tag ];
+    plugins = [
+      plugin-smtp
+      plugin-tag
+      plugin-pagelist # required for plugin-tag  
+    ];
 
     nginx = {
       enableACME = true;
