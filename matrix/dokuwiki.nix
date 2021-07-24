@@ -50,7 +50,7 @@ in
       #
       # Disable all access to user's home namespaces not owned by logged in user 
       # (include view namespaces via the index) 
-      user:*          @user       0
+      user:*          @user       1
       user:*          @ALL        0
     '';
     # usersFile = config.deployment.keys.dokuwiki-users.path;
