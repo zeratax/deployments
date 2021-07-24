@@ -21,6 +21,6 @@
     swapDevices = [ ];
 
     networking.useDHCP = false;
-    networking.interfaces.ens10.useDHCP = true;
+    # networking.interfaces.ens10.useDHCP = true;
     networking.interfaces.ens3.useDHCP = true;
 }
