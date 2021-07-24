@@ -11,11 +11,11 @@ in {
 
   services.mautrix-telegram = {
     enable = true;
-    environmentFile = /run/keys/mautrix-telegram-secrets;
+    environmentFile = config.deployment.keys.mautrix-telegram-secrets.path;
     settings = {
       homeserver = {
+        inherit domain;
         address = "http://localhost:8008";
-        domain = domain;
       };
       appservice = {
         provisioning = {

@@ -5,11 +5,6 @@ let
       join = hostName: domain: hostName + lib.strings.optionalString (domain != null) ".${domain}";
     in join config.networking.hostName config.networking.domain;
 in {
-
-  imports = [
-    ./mautrix-telegram.nix
-  ];
-  
   networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   services.postgresql.enable = true;
@@ -41,14 +36,6 @@ in {
         ];
       }
     ];
-    app_service_config_files = lib.mkIf config.services.mautrix-telegram.enable
-      [
-        # The registration file is automatically generated after starting the appservice for the first time.
-        # cp /var/lib/mautrix-telegram/telegram-registration.yaml /var/lib/matrix-synapse/
-        # chown matrix-synapse:matrix-synapse /var/lib/matrix-synapse/telegram-registration.yaml
-        "/var/lib/matrix-synapse/telegram-registration.yaml"
-      ]
-    ;
   };
 
   services.nginx = {
@@ -77,29 +64,19 @@ in {
           proxyPass = "http://[::1]:8008"; # without a trailing /
         };
 
-        locations."/_matrix/appservice-telegram" = lib.mkIf config.services.mautrix-telegram.enable {
-          proxyPass = "http://localhost:${toString config.services.mautrix-telegram.settings.appservice.port}";
-          extraConfig = ''
-            client_max_body_size       1m;
-            client_body_buffer_size    128k;
-          '';
-        };
+        # locations."/_matrix/appservice-telegram" = lib.mkIf config.services.mautrix-telegram.enable {
+        #   proxyPass = "http://localhost:${toString config.services.mautrix-telegram.settings.appservice.port}";
+        #   extraConfig = ''
+        #     client_max_body_size       1m;
+        #     client_body_buffer_size    128k;
+        #   '';
+        # };
       };
 
       # This host section can be placed on a different host than the rest,
       # i.e. to delegate from the host being accessible as ${config.networking.domain}
       # to another host actually running the Matrix homeserver.
       "${config.networking.domain}" = {  
-        locations."= /.well-known/matrix/server".extraConfig =
-          let
-            # use 443 instead of the default 8448 port to unite
-            # the client-server and server-server port for simplicity
-            server = { "m.server" = "${fqdn}:443"; };
-          in ''
-            add_header Content-Type application/json;
-            return 200 '${builtins.toJSON server}';
-          '';
-
         locations."= /.well-known/matrix/client".extraConfig =
           let
             client = {
@@ -111,6 +88,15 @@ in {
             add_header Content-Type application/json;
             add_header Access-Control-Allow-Origin *;
             return 200 '${builtins.toJSON client}';
+          '';
+        locations."= /.well-known/matrix/server".extraConfig =
+          let
+            # use 443 instead of the default 8448 port to unite
+            # the client-server and server-server port for simplicity
+            server = { "m.server" = "${fqdn}:443"; };
+          in ''
+            add_header Content-Type application/json;
+            return 200 '${builtins.toJSON server}';
           '';
       };
     };
