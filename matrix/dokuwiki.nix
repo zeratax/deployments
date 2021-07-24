@@ -44,15 +44,29 @@ let
     dontConfigure = true;
     installPhase = "mkdir -p $out; cp -R * $out/";
   };
+  plugin-mathjax = pkgs.stdenv.mkDerivation rec {
+    name = "mathjax";
+
+    src = pkgs.fetchFromGitHub {
+      owner = "liffiton";
+      repo = "dokuwiki-plugin-mathjax";
+      rev = "fc0d3cb13d7ad7e32979e0ba5b2c2fc0f0e2c502";
+      sha256 = "03790r87l6x9855j0bb27mxqz3pn3j3iwq7a0sslnm1x9z9495ny";
+    };
+
+    preferLocalBuild = true;
+    dontConfigure = true;
+    installPhase = "mkdir -p $out; cp -R * $out/";
+  };
 in
 {
-  deployment.keys.dokuwiki-users.text = builtins.readFile ./dokuwiki-users.key;
-  deployment.keys.dokuwiki-acl.text = builtins.readFile ./dokuwiki-acl.key;
+  # deployment.keys.dokuwiki-users.text = builtins.readFile ./dokuwiki-users.key;
+  # deployment.keys.dokuwiki-acl.text = builtins.readFile ./dokuwiki-acl.key;
 
-  deployment.keys.dokuwiki-users.user = config.users.users.dokuwiki.name;
-  deployment.keys.dokuwiki-users.group = config.users.groups.nginx.name;
-  deployment.keys.dokuwiki-acl.user = config.users.users.dokuwiki.name;
-  deployment.keys.dokuwiki-acl.group = config.users.groups.nginx.name;
+  # deployment.keys.dokuwiki-users.user = config.users.users.dokuwiki.name;
+  # deployment.keys.dokuwiki-users.group = config.users.groups.nginx.name;
+  # deployment.keys.dokuwiki-acl.user = config.users.users.dokuwiki.name;
+  # deployment.keys.dokuwiki-acl.group = config.users.groups.nginx.name;
   # deployment.keys.dokuwiki-acl.permissions = "0750";
 
   services.dokuwiki."${domain}" = {
@@ -95,6 +109,7 @@ in
       plugin-smtp
       plugin-tag
       plugin-pagelist # required for plugin-tag  
+      plugin-mathjax
     ];
 
     nginx = {
