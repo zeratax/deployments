@@ -16,7 +16,7 @@ in {
 
   services.matrix-synapse = {
     enable = true;
-    registration_shared_secret = builtins.readFile ./mautrix-shared-secret.key;
+    registration_shared_secret = builtins.readFile ./registration-shared-secret.key;
 
     server_name = config.networking.domain;
     listeners = [
@@ -46,11 +46,10 @@ in {
     recommendedProxySettings = true;
 
     virtualHosts = {
-      forceSSL = true;
-      enableACME = true;
-
       # Reverse proxy for Matrix client-server and server-server communication
       ${fqdn} = {
+        forceSSL = true;
+        enableACME = true;
         # Or do a redirect instead of the 404, or whatever is appropriate for you.
         # But do not put a Matrix Web client here! See the Element web section below.
         locations."/".extraConfig = ''
@@ -75,6 +74,9 @@ in {
       # i.e. to delegate from the host being accessible as ${config.networking.domain}
       # to another host actually running the Matrix homeserver.
       "${config.networking.domain}" = {  
+        forceSSL = true;
+        enableACME = true;
+
         locations."= /.well-known/matrix/client".extraConfig =
           let
             client = {

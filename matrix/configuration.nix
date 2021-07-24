@@ -3,7 +3,7 @@
   cloud =
     { config, pkgs, ... }:
     { 
-        deployment.targetHost = "165.227.167.178";
+        deployment.targetHost = "162.55.209.118";
 
         imports = [
             ../providers/hetzner.nix
