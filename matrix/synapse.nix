@@ -5,8 +5,6 @@ let
       join = hostName: domain: hostName + lib.strings.optionalString (domain != null) ".${domain}";
     in join config.networking.hostName config.networking.domain;
 in {
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
-
   services.postgresql.enable = true;
   services.postgresql.initialScript = pkgs.writeText "synapse-init.sql" ''
     CREATE ROLE "matrix-synapse" WITH LOGIN PASSWORD '${builtins.readFile ./postgres-pass.key}';
