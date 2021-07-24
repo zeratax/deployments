@@ -12,6 +12,7 @@ in
       ./hardware-configuration.nix
       <nixos-hardware/common/pc/ssd>
       <nixos-hardware/common/cpu/intel>
+      ./mreg.nix
     ] ++ lib.optionals (builtins.pathExists ./cachix.nix) [ ./cachix.nix ];
 
   ################### Hardware Stuff ###################
@@ -24,20 +25,30 @@ in
 
   hardware.steam-hardware.enable = true;
 
-  ################### Boot Loader ###################
-  # boot.loader.systemd-boot.enable = true;
-  boot.loader = {
-    efi = {
-      canTouchEfiVariables = false;
-      efiSysMountPoint = "/boot";
+  hardware = {
+    opengl = {
+      driSupport = true;
+      driSupport32Bit = true;
     };
-    grub = {
-      devices = [ "nodev" ];
-      enable = true;
-      efiInstallAsRemovable = true;
-      efiSupport = true;
-      version = 2;
-      useOSProber = true;
+  };
+
+  ################### Boot Loader ###################
+  boot = {
+    kernelParams = [ "intel_idle.max_cstate=1" ];
+    loader = {
+      systemd-boot.enable = true;
+      efi = {
+        canTouchEfiVariables = false;
+        # efiSysMountPoint = "/boot";
+      };
+      # grub = {
+      #   devices = [ "nodev" ];
+      #   enable = true;
+      #   efiInstallAsRemovable = true;
+      #   efiSupport = true;
+      #   version = 2;
+      #   useOSProber = true;
+      # };
     };
   };
 
@@ -127,6 +138,7 @@ in
     pkgs.libu2f-host
   ];
   services.mullvad-vpn.enable = true;
+  networking.firewall.checkReversePath = "loose"; # https://github.com/NixOS/nixpkgs/issues/113589
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
@@ -144,6 +156,7 @@ in
   services.xserver.xkbOptions = "eurosign:e";
 
   services.xserver.videoDrivers = [
+    # "nouveau"
     "nvidia"
   ];
 
@@ -151,11 +164,11 @@ in
   # Enable the KDE Desktop Environment.
   services.xserver.displayManager.sddm.enable = true;
   services.xserver.desktopManager.plasma5.enable = true;
-  # services.xserver.desktopManager.gnome3.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
   # https://github.com/NixOS/nixpkgs/issues/75867#issuecomment-591648489
   programs.ssh.askPassword = lib.mkForce "${pkgs.libsForQt5.ksshaskpass.out}/bin/ksshaskpass";
   services.xserver.windowManager.i3.enable = true;
-  services.xserver.displayManager.defaultSession = "plasma";
+  services.xserver.displayManager.defaultSession = "plasma5";
 
   # Enable color calibration
   services.colord.enable = lib.mkIf config.services.xserver.enable true;

@@ -6,14 +6,15 @@
         deployment.targetHost = "165.227.167.178";
 
         imports = [
-            ../providers/digitalocean.nix
+            ../providers/hetzner.nix
             ../common/ssh.nix
             ../common/lets-encrypt.nix
-            ./networking.nix # generated at runtime by nixos-infect
             ./synapse.nix 
+            ./dokuwiki.nix
         ];
 
         networking = {
+          firewall.allowedTCPPorts = [ 80 443 ];
           hostName = "matrix";
           domain = "staging.dmnd.sh";
         };

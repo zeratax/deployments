@@ -30,12 +30,6 @@
       fsType = "vfat";
     };
 
-  fileSystems."/var/lib/docker/btrfs" =
-    { device = "/home/@/var/lib/docker/btrfs";
-      fsType = "none";
-      options = [ "bind" ];
-    };
-
   swapDevices =
     [ { device = "/dev/disk/by-uuid/ce7ec71c-c604-4d72-8c0e-f06522b1de04"; }
     ];
