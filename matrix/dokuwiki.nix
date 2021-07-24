@@ -13,9 +13,21 @@ let
     };
 
     preferLocalBuild = true;
-
     dontConfigure = true;
+    installPhase = "mkdir -p $out; cp -R * $out/";
+  };
+  plugin-tag = pkgs.stdenv.mkDerivation rec {
+    name = "tag";
 
+    src = pkgs.fetchFromGitHub {
+      owner = "dokufreaks";
+      repo = "plugin-tag";
+      rev = "43713280b4675158ba736f3518d64224ab9cbf95";
+      sha256 = "1bhxjvpjnzdalmvryxk00ykqqq0b4jy5g3ynnzhlm53x8yi9phdj";
+    };
+
+    preferLocalBuild = true;
+    dontConfigure = true;
     installPhase = "mkdir -p $out; cp -R * $out/";
   };
 in
@@ -65,7 +77,7 @@ in
       ${builtins.readFile ./dokuwiki-smtp.key} 
     '';
 
-    plugins = [ plugin-smtp ];
+    plugins = [ plugin-smtp plugin-tag ];
 
     nginx = {
       enableACME = true;
