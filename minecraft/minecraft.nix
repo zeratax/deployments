@@ -51,7 +51,7 @@ in
 
     serverProperties = {
       server-name = "DIAMONDS";
-      level-name = "antarcticite";
+      level-name = "skyblock";
       level-type = "default";
       motd = "a weak diamond is no diamond at all";
 
