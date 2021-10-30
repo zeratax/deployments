@@ -3,7 +3,7 @@ with lib;
 let
   nur-pkgs = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
     inherit pkgs;
-    repoOverrides = {} // lib.optionalAttrs builtins.pathExists ~/git/nur-packages {
+    repoOverrides = {} // lib.optionalAttrs (builtins.pathExists ~/git/nur-packages) {
       zeratax = import ~/git/nur-packages {};
     };
   };
@@ -19,11 +19,6 @@ let
       -P ${mc-settings."rcon.password"}'';
 in
 {
-  disabledModules = [ "services/backup/restic.nix" ];
-  imports = [
-    nur-pkgs.repos.zeratax.modules.restic
-  ];
-
   deployment.keys.aws-secrets.text = builtins.readFile ./aws-secrets.key;
   deployment.keys.restic-password.text = builtins.readFile ./restic-password.key;
 
@@ -66,23 +61,25 @@ in
       passwordFile = config.deployment.keys.restic-password.path;
 
       initialize = true;
-      preStart = ''
-        ${rcon} <<EOS
-          say Creating backup...
-          save-all
-          save-off
-        EOS
-      '';
-      postStart = ''
-        ${rcon} <<EOS
-          save-on
-          say ...finished backup!
-        EOS
-      '';
     };
   };
 
-  systemd.services.restic-backups-mc-worlds.onFailure = [ "worldBackupFailure.service" ];
+  systemd.services.restic-backups-mc-worlds = {
+    onFailure = [ "worldBackupFailure.service" ];
+    preStart = ''
+      ${rcon} <<EOS
+        say Creating backup...
+        save-all
+        save-off
+      EOS
+    '';
+    postStart = ''
+      ${rcon} <<EOS
+        save-on
+        say ...finished backup!
+      EOS
+    '';
+  };
 
   systemd.services."restoreBackup@" = {
     onFailure = [ "worldBackupFailure.service" ];
@@ -98,6 +95,8 @@ in
     };
     script = ''
       ${pkgs.restic}/bin/restic restore $SNAPSHOT_ID --target /
+      ${pkgs.systemd}/bin/systemctl restart bukkit-server.service
     '';
+
   };
 }
