@@ -47,7 +47,7 @@ in
     declarative = true;
     eula = true;
     openFirewall = true;
-    package = pkgsUnstable.papermc; 
+    package = pkgs.papermc; 
 
     serverProperties = {
       server-name = "DIAMONDS";
@@ -142,11 +142,11 @@ in
   #   };
   # };
 
-  systemd.services.bukkit-server = {
-    serviceConfig = {
-      Group = config.users.groups.minecraft.name;
-    };
-  };
+  # systemd.services.bukkit-server = {
+  #   serviceConfig = {
+  #     Group = config.users.groups.minecraft.name;
+  #   };
+  # };
 
   # systemd.services.nginx.serviceConfig.ReadWritePaths = [ "/var/lib/minecraft/plugins/dynmap/" ];
 
