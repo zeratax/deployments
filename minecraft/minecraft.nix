@@ -109,7 +109,7 @@ in
             BotToken = builtins.readFile ./bot-token.key;
             AvatarUrl = "https://crafatar.com/renders/head/{uuid-nodashes}.png?size={size}&overlay#{texture}";
             Channels = {
-              global = "189775065116573696";
+              global = "901949237162541107";
             };
             DiscordCannedResponses = {
               "!ip" = "mc.dmnd.sh";
