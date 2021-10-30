@@ -199,7 +199,7 @@ in
   services.xserver.desktopManager.plasma5.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
   # https://github.com/NixOS/nixpkgs/issues/75867#issuecomment-591648489
-  programs.ssh.askPassword = lib.mkForce "${pkgs.libsForQt5.ksshaskpass.out}/bin/ksshaskpass";
+  programs.ssh.askPassword = pkgs.lib.mkForce "${pkgs.ksshaskpass.out}/bin/ksshaskpass";
   services.xserver.windowManager.i3.enable = true;
   services.xserver.displayManager.defaultSession = "plasma5";
 
