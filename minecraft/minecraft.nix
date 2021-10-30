@@ -3,10 +3,11 @@ with lib;
 let
   nur-pkgs = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
     inherit pkgs;
-    repoOverrides = {} // optionalAttrs builtins.pathExists ~/git/nur-packages {
+    repoOverrides = {} // optionalAttrs (builtins.pathExists ~/git/nur-packages) {
       zeratax = import ~/git/nur-packages {};
     };
   };
+  pkgsUnstable = import <nixos-unstable> { };
 
   plugins = config.services.bukkit-plugins.plugins;
   dynmap-defaults = import ./plugin-settings/dynmap.nix { };
@@ -46,7 +47,7 @@ in
     declarative = true;
     eula = true;
     openFirewall = true;
-    package = newpapermc; # unstable uses a too recent version of java
+    package = pkgsUnstable.papermc; 
 
     serverProperties = {
       server-name = "DIAMONDS";
@@ -126,19 +127,28 @@ in
     };
   };
 
-  # create a group minecraft, so that nginx can read files
-  users.groups.minecraft = {
-    members = [
-      config.users.users.minecraft.name
-      config.services.nginx.user
-    ];
-  };
+  # ~~create a group minecraft, so that nginx can read files~~
+  # somehow nginx can't access these files no matter what i try ;-;
+
+  # users = {
+  #   users.nginx = {
+  #     extraGroups = [ config.users.groups.minecraft.name ];
+  #   };
+  #   groups.minecraft = {
+  #     members = [
+  #       config.users.users.minecraft.name
+  #       config.services.nginx.user
+  #     ];
+  #   };
+  # };
 
   systemd.services.bukkit-server = {
     serviceConfig = {
       Group = config.users.groups.minecraft.name;
     };
   };
+
+  # systemd.services.nginx.serviceConfig.ReadWritePaths = [ "/var/lib/minecraft/plugins/dynmap/" ];
 
   services.nginx = {
     enable = true;
@@ -151,14 +161,14 @@ in
       forceSSL = true;
       enableACME = true;
 
-      locations."~ ^/(tiles|css|images|js)/" = {
-        root = "${config.services.bukkit-plugins.pluginsDir}/dynmap/web";
+      # locations."~ ^/(tiles|css|images|js)/" = {
+      #   root = "${config.services.bukkit-plugins.pluginsDir}/dynmap/web";
 
-        extraConfig = ''
-          expires     0;
-          add_header  Cache-Control private;
-        '';
-      };
+      #   extraConfig = ''
+      #     expires     0;
+      #     add_header  Cache-Control private;
+      #   '';
+      # };
 
       locations."/" = {
         proxyPass = "http://localhost:${builtins.toString plugins.dynmap.settings."dynmap/configuration.txt".webserver-port}";
