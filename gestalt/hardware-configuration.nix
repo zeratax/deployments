@@ -16,13 +16,13 @@
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/202228f1-f390-40d0-b31a-38a634c89468";
       fsType = "btrfs";
-      options = [ "subvol=@" "noatime" "nodiratime" "discard" ];
+      options = [ "subvol=@" "noatime" "nodiratime" "discard" "clear_cache" ];
     };
 
   fileSystems."/home" =
     { device = "/dev/disk/by-uuid/202228f1-f390-40d0-b31a-38a634c89468";
       fsType = "btrfs";
-      options = [ "subvol=@home""noatime" "nodiratime" "discard" ];
+      options = [ "subvol=@home""noatime" "nodiratime" "discard" "clear_cache" ];
     };
 
   fileSystems."/boot" =
@@ -34,5 +34,5 @@
     [ { device = "/dev/disk/by-uuid/ce7ec71c-c604-4d72-8c0e-f06522b1de04"; }
     ];
 
-  powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
+  # powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
 }

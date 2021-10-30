@@ -1,7 +1,3 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { config, pkgs, lib, ... }:
 let
   nixos-unstable = import <nixos-unstable> { };
@@ -10,12 +6,65 @@ in
   imports =
     [
       ./hardware-configuration.nix
+      # ./pci-passthrough.nix
       <nixos-hardware/common/pc/ssd>
       <nixos-hardware/common/cpu/intel>
-      ./mreg.nix
+      <nixos-unstable/nixos/modules/hardware/video/nvidia.nix>
     ] ++ lib.optionals (builtins.pathExists ./cachix.nix) [ ./cachix.nix ];
 
+  disabledModules = [
+    "hardware/video/nvidia.nix"
+  ];
+
+  ################### Nix Configuration ###################
+  nix = {
+    autoOptimiseStore = true;
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+    # free up 1GiB when less than 100MiB left
+    extraOptions = ''
+      min-free = ${toString (100 * 1024 * 1024)}
+      max-free = ${toString (1024 * 1024 * 1024)}
+    '';
+  };
+
+  ################### Nixpkgs Overwrites ###################
+  nixpkgs.overlays = [
+    (self: super:
+    {
+      linuxPackages_latest = super.linuxPackages_latest.extend (linuxSelf: linuxSuper:
+      let
+        generic = args: linuxSelf.callPackage (import <nixos-unstable/pkgs/os-specific/linux/nvidia-x11/generic.nix> args) { };
+      in
+      {
+        nvidiaPackages.stable = generic {
+          version = "470.63.01";
+          sha256_64bit = "sha256:057dsc0j3136r5gc08id3rwz9c0x7i01xkcwfk77vqic9b6486kg";
+          settingsSha256 = "sha256:0lizp4hn49yvca2yd76yh3awld98pkaa35a067lpcld35vb5brgv";
+          persistencedSha256 = "sha256:1f3gdpa23ipjy2xwf7qnxmw7w8xxhqy25rmcz34xkngjf4fn4pbs";
+        };
+      });
+    })
+  ];
+
+  nixpkgs.config.allowUnfree = true;
+
+  nixpkgs.config.packageOverrides = pkgs: {
+    # amdvlk = nixos-unstable.amdvlk;
+    mullvad-vpn = nixos-unstable.mullvad-vpn;
+  };
+
+
   ################### Hardware Stuff ###################
+  # pci-passthrough
+  # pciPassthrough = {
+  #   enable = true;
+  #   pciIDs = "";
+  #   libvirtUsers = [ config.users.users.kaine.name ];
+  # };
   hardware.enableRedistributableFirmware = true;
 
   # Enable sound.
@@ -34,7 +83,7 @@ in
 
   ################### Boot Loader ###################
   boot = {
-    kernelParams = [ "intel_idle.max_cstate=1" ];
+    # kernelParams = [ "intel_idle.max_cstate=1" ]; # https://gist.github.com/Brainiarc7/8dfd6bb189b8e6769bb5817421aec6d1
     loader = {
       systemd-boot.enable = true;
       efi = {
@@ -50,17 +99,6 @@ in
       #   useOSProber = true;
       # };
     };
-  };
-
-  ################### Nixpkgs Overwrites ###################
-  nixpkgs.overlays = [
-  ];
-
-  nixpkgs.config.allowUnfree = true;
-
-  nixpkgs.config.packageOverrides = pkgs: {
-    # amdvlk = nixos-unstable.amdvlk;
-    mullvad-vpn = nixos-unstable.mullvad-vpn;
   };
 
   ################### Networking ###################
@@ -121,8 +159,6 @@ in
   ] ++ lib.lists.optionals config.services.xserver.desktopManager.plasma5.enable [
     libsForQt5.akonadi-search
     ark
-  ] ++ lib.lists.optionals config.services.xserver.enable [
-    firefox
   ];
 
   programs.gnupg.agent = {
@@ -150,15 +186,12 @@ in
   services.gnome.gnome-keyring.enable = true;
 
   # Enable the X11 windowing system.
+  services.xserver.videoDrivers = [ "nvidia" "modesetting" ];
+
   services.xserver.enable = true;
   services.xserver.layout = "us";
   services.xserver.xkbVariant = "intl";
   services.xserver.xkbOptions = "eurosign:e";
-
-  services.xserver.videoDrivers = [
-    # "nouveau"
-    "nvidia"
-  ];
 
   ################### X Server Stuff ###################
   # Enable the KDE Desktop Environment.
@@ -181,6 +214,5 @@ in
       "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEA5K62E/ZFLEOIQmzKClxVAP5GmR+6ir+hWxPxK9XfvMZtTtCcnhXBnXNfQlSrX301INy9DiVfN+bRYHS3LU7TUfEcd6E5iwCOH6o9nRVZS7IkJDN/cw0m3co7cFeoayNZylIeACVfM7DwBjzzOXMV3T4hN5LbHkpv63CNTTTQqBaak+CZBQFmzMgIYGiEAi5a3yzZFpVh46JkaasDO2C9SfTNBIuCfaUIAbMbXb09B6FsirBdhndEI2fpT+1jYM0PUeqnxDbYuv5UDwDgKADo/HBAid1X4srJZzMjcnFjtwrazk3/DzyICnZM4R6xuw4cOYiDgfbfYsLYaT70YqFPUw=="
     ];
   };
-  system.stateVersion = "21.05"; # Did you read the comment?
-
+  system.stateVersion = "21.05";
 }
