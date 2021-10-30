@@ -3,7 +3,7 @@
   cloud =
     { config, pkgs, ... }:
     { 
-        deployment.targetHost = "162.55.209.118";
+        deployment.targetHost = "staging.dmnd.sh";
 
         imports = [
             ../providers/hetzner.nix
@@ -16,7 +16,7 @@
         networking = {
           firewall.allowedTCPPorts = [ 80 443 ];
           hostName = "matrix";
-          domain = "staging.dmnd.sh";
+          domain = config.deployment.targetHost;
         };
     };
 }

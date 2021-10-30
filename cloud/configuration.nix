@@ -3,7 +3,7 @@
   cloud =
     { config, pkgs, ... }:
     { 
-        deployment.targetHost = "49.12.106.164";
+        deployment.targetHost = "cloud.dmnd.sh";
 
         imports = [
             ../providers/hetzner.nix
@@ -16,7 +16,7 @@
 
         networking = {
             hostName = "cloud";
-            domain = "cloud.dmnd.sh";
+            domain = config.deployment.targetHost;
         };
     };
 }

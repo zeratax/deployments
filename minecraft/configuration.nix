@@ -3,7 +3,7 @@
   minecraft =
     { config, pkgs, ... }:
     { 
-        deployment.targetHost = "65.21.110.116";
+        deployment.targetHost = "mc.dmnd.sh";
 
         imports = [
             ../providers/hetzner.nix
@@ -16,7 +16,7 @@
 
         networking = {
           hostName = "minecraft";
-          domain = "mc.dmnd.sh";
+          domain = config.deployment.targetHost;
         };
     };
 }
