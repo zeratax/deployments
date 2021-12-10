@@ -16,17 +16,29 @@ let
   paper-defaults = import ./plugin-settings/paper.nix { };
 
   # this seems dumb
-  mcVersion = "1.16.5";
-  buildNum = "771";
-  jar = pkgs.fetchurl {
-    url = "https://papermc.io/api/v1/paper/${mcVersion}/${buildNum}/download";
-    sha256 = "1lmlfhigbzbkgzfq6knglka0ccf4i32ch25gkny0c5fllmsnm08l";
+  mcVersion = "1.18";
+  buildNum = "57";
+  papermcjar = pkgs.fetchurl {
+    url = "https://papermc.io/api/v2/projects/paper/versions/${mcVersion}/builds/${buildNum}/downloads/paper-${mcVersion}-${buildNum}.jar";
+    sha256 = "00c71fb787603ddd6244758f1be44e789baaa5bd56a9dc51dca97917f5aa164f";
   };
   newpapermc = pkgs.papermc.overrideAttrs (old: {
     version = "${mcVersion}r${buildNum}";
     installPhase = ''
-      install -Dm444 ${jar} $out/share/papermc/papermc.jar
+      install -Dm444 ${papermcjar} $out/share/papermc/papermc.jar
       install -Dm555 -t $out/bin minecraft-server
+    '';
+  });
+  
+  dynmapjar = pkgs.fetchurl {
+    url = "https://dynmap.us/builds/dynmap/Dynmap-3.3-SNAPSHOT-spigot.jar";
+    sha256 = "07sj77srvlhvaag8rdnfp5hir97abssgy0xhn12sgbvw7p1lrza3";
+  };
+  newdynmap = nur-pkgs.repos.zeratax.bukkitPlugins.dynmap.overrideAttrs (old: rec {
+    version = "3.3-beta-1";
+    installPhase = ''
+      mkdir -p $out
+      cp ${dynmapjar} $out/dynmap.jar
     '';
   });
 in
@@ -47,11 +59,11 @@ in
     declarative = true;
     eula = true;
     openFirewall = true;
-    package = pkgs.papermc; 
+    package = newpapermc; 
 
     serverProperties = {
       server-name = "DIAMONDS";
-      level-name = "skyblock";
+      level-name = "alexandrite";
       level-type = "default";
       motd = "a weak diamond is no diamond at all";
 
@@ -63,6 +75,8 @@ in
 
       spawn-protection = 0;
       max-tick-time = 60000;
+
+      enable-command-block = true;
 
       enable-query = true;
       enable-rcon = true;
@@ -93,11 +107,13 @@ in
       harbor = {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.harbor;
         settings = recursiveUpdate harbor-defaults {
-          # overwrite defaults here
+          "Harbor/config.yml" = {
+            messages.actionbar.enabled = false;
+          };
         };
       };
       dynmap = {
-        package = nur-pkgs.repos.zeratax.bukkitPlugins.dynmap;
+        package = newdynmap; #nur-pkgs.repos.zeratax.bukkitPlugins.dynmap;
         settings = recursiveUpdate dynmap-defaults {
           # overwrite defaults here
         };
@@ -112,7 +128,7 @@ in
               global = "901949237162541107";
             };
             DiscordCannedResponses = {
-              "!ip" = "mc.dmnd.sh";
+              "!ip" = config.networking.domain;
               "!site" = "http://dmnd.sh";
             };
             Experiment_WebhookChatMessageDelivery = true;
@@ -121,6 +137,8 @@ in
               "Gems"
             ];
             ChannelTopicUpdaterChannelTopicsAtShutdownEnabled = false;
+            DiscordInviteLink = "https://discord.gg/qAeGaEwy";
+            EnablePresenceInformation = true;
           };
         };
       };
