@@ -41,6 +41,18 @@ let
       cp ${dynmapjar} $out/dynmap.jar
     '';
   });
+  discordsrvjar = pkgs.fetchurl {
+    url = "https://nexus.scarsz.me/service/local/repositories/snapshots/content/com/discordsrv/discordsrv/1.24.1-SNAPSHOT/discordsrv-1.24.1-20211224.003647-46.jar";
+    sha256 = "1668rly7nf8v3kfggr31hk8rfp6vf2pxq3vxcy84jzr6gqs7nsxv";
+  };
+  newdiscordsrv = nur-pkgs.repos.zeratax.bukkitPlugins.discordsrv.overrideAttrs (old: rec {
+    version = "1.24.1-SNAPSHOT";
+    installPhase = ''
+      mkdir -p $out
+      cp ${discordsrvjar} $out/discordsrv.jar
+    '';
+  });
+
 in
 {
   imports = [
@@ -119,7 +131,7 @@ in
         };
       };
       discordsrv = {
-        package = nur-pkgs.repos.zeratax.bukkitPlugins.discordsrv;
+        package = newdiscordsrv; #nur-pkgs.repos.zeratax.bukkitPlugins.discordsrv;
         settings = recursiveUpdate discordsrv-defaults {
           "DiscordSRV/config.yml" = {
             BotToken = builtins.readFile ./bot-token.key;
@@ -137,7 +149,7 @@ in
               "Gems"
             ];
             ChannelTopicUpdaterChannelTopicsAtShutdownEnabled = false;
-            DiscordInviteLink = "https://discord.gg/qAeGaEwy";
+            DiscordInviteLink = "https://discord.gg/MVYe49X";
             EnablePresenceInformation = true;
           };
         };
