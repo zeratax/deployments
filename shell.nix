@@ -1,4 +1,6 @@
 { pkgs ? import <nixpkgs> {} }:
-  pkgs.mkShell {
-    nativeBuildInputs = with pkgs; [ nixops ];
+let
+  nixos-old = import <nixos-21.11> { };
+in pkgs.mkShell {
+  nativeBuildInputs = with pkgs; [ nixos-old.nixops ];
 }
