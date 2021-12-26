@@ -58,12 +58,40 @@ in
   imports = [
     nur-pkgs.repos.zeratax.modules.bukkit-plugins
     nur-pkgs.repos.zeratax.modules.bukkit-server
+    nur-pkgs.repos.zeratax.modules.dmnd-bot
   ];
+
+  nixpkgs.config.packageOverrides = pkgs: {
+    dmnd-bot = nur-pkgs.repos.zeratax.dmnd-bot.overrideAttrs (old: rec {
+      preCheck = ''
+        echo "creating test certs..."
+        pushd spec/test_certs/
+        bash create_certs.sh
+        popd
+        echo "done!"
+      '';
+    });
+  };
 
   # open ports to host e.g. a dynmap
   networking.firewall = {
     allowedTCPPorts = [ 80 443 ];
     allowPing = true;
+  };
+
+  services.dmnd-bot = {
+    enable = true;
+
+    settings = {
+      discord = {
+        id = lib.toInt (builtins.readFile ./discord_id.key);
+        token = lib.removeSuffix "\n" (builtins.readFile ./discord_token.key);
+      };
+      saucenao = {
+        enabled = true;
+        token = lib.removeSuffix "\n" (builtins.readFile ./saucenao.key);
+      };
+    };
   };
 
   services.bukkit-server = {
