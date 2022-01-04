@@ -53,7 +53,7 @@ in
     # Set what time makes sense for you
     autoUpdateApps.startAt = "05:00:00";
 
-    package = pkgs.nextcloud21;
+    package = pkgs.nextcloud23;
 
     maxUploadSize = "10G";
 
