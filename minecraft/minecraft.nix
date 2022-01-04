@@ -32,7 +32,7 @@ let
   
   dynmapjar = pkgs.fetchurl {
     url = "https://dynmap.us/builds/dynmap/Dynmap-3.3-SNAPSHOT-spigot.jar";
-    sha256 = "07sj77srvlhvaag8rdnfp5hir97abssgy0xhn12sgbvw7p1lrza3";
+    sha256 = "07c8hq10imx3ffyc9cs8wx98wrw3ar0hs7an7b8bs55d2rh909f8";
   };
   newdynmap = nur-pkgs.repos.zeratax.bukkitPlugins.dynmap.overrideAttrs (old: rec {
     version = "3.3-beta-1";
@@ -62,7 +62,9 @@ in
   ];
 
   nixpkgs.config.packageOverrides = pkgs: {
+    # idk this is being weird...
     dmnd-bot = nur-pkgs.repos.zeratax.dmnd-bot.overrideAttrs (old: rec {
+      src = ~/git/dmnd-bot;
       preCheck = ''
         echo "creating test certs..."
         pushd spec/test_certs/
