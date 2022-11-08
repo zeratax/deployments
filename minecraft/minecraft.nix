@@ -107,7 +107,7 @@ in
 
     serverProperties = {
       server-name = "DIAMONDS";
-      level-name = "alexandrite";
+      level-name = "cairngorm";
       level-type = "default";
       motd = "a weak diamond is no diamond at all";
 

@@ -39,8 +39,11 @@ in
     mc-worlds = {
       paths = [
         "${mc-dir}/${mc-settings.level-name}/"
-        "${mc-dir}/${mc-settings.level-name}_nether"
-        "${mc-dir}/${mc-settings.level-name}_the_end"
+        "${mc-dir}/${mc-settings.level-name}_nether/"
+        "${mc-dir}/${mc-settings.level-name}_the_end/"
+        "${mc-dir}/alexandrite/"
+        "${mc-dir}/alexandrite_nether/"
+        "${mc-dir}/alexandrite_the_end/"
         "${mc-dir}/phosphophyllite/"
         "${mc-dir}/phosphophyllite_nether/"
         "${mc-dir}/phosphophyllite_the_end/"
