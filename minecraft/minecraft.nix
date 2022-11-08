@@ -16,11 +16,11 @@ let
   paper-defaults = import ./plugin-settings/paper.nix { };
 
   # this seems dumb
-  mcVersion = "1.18";
-  buildNum = "57";
+  mcVersion = "1.19.2";
+  buildNum = "263";
   papermcjar = pkgs.fetchurl {
     url = "https://papermc.io/api/v2/projects/paper/versions/${mcVersion}/builds/${buildNum}/downloads/paper-${mcVersion}-${buildNum}.jar";
-    sha256 = "00c71fb787603ddd6244758f1be44e789baaa5bd56a9dc51dca97917f5aa164f";
+    sha256 = "41efcfe984c4aef2ef37a2d03f0a50f8b2d6d094ebb7891139890ab79b2ac3ff";
   };
   newpapermc = pkgs.papermc.overrideAttrs (old: {
     version = "${mcVersion}r${buildNum}";
@@ -31,22 +31,22 @@ let
   });
   
   dynmapjar = pkgs.fetchurl {
-    url = "https://dynmap.us/builds/dynmap/Dynmap-3.3-SNAPSHOT-spigot.jar";
-    sha256 = "07c8hq10imx3ffyc9cs8wx98wrw3ar0hs7an7b8bs55d2rh909f8";
+    url = "https://dynmap.us/releases/Dynmap-3.4-spigot.jar";
+    sha256 = "06c7xmpi7v92linjqpbdqncm536v64791i6vc20kww2anybfp045";
   };
   newdynmap = nur-pkgs.repos.zeratax.bukkitPlugins.dynmap.overrideAttrs (old: rec {
-    version = "3.3-beta-1";
+    version = "3.4";
     installPhase = ''
       mkdir -p $out
       cp ${dynmapjar} $out/dynmap.jar
     '';
   });
   discordsrvjar = pkgs.fetchurl {
-    url = "https://nexus.scarsz.me/service/local/repositories/snapshots/content/com/discordsrv/discordsrv/1.24.1-SNAPSHOT/discordsrv-1.24.1-20211224.003647-46.jar";
-    sha256 = "1668rly7nf8v3kfggr31hk8rfp6vf2pxq3vxcy84jzr6gqs7nsxv";
+    url = "https://nexus.scarsz.me/service/local/repositories/snapshots/content/com/discordsrv/discordsrv/1.26.1-SNAPSHOT/discordsrv-1.26.1-20221030.044726-8.jar";
+    sha256 = "1a692s0kpgcjz5r77rqkdcma8srcya0pl6c2pl6ii1hgif0lgnk6";
   };
   newdiscordsrv = nur-pkgs.repos.zeratax.bukkitPlugins.discordsrv.overrideAttrs (old: rec {
-    version = "1.24.1-SNAPSHOT";
+    version = "1.26.1-SNAPSHOT";
     installPhase = ''
       mkdir -p $out
       cp ${discordsrvjar} $out/discordsrv.jar
@@ -63,16 +63,18 @@ in
 
   nixpkgs.config.packageOverrides = pkgs: {
     # idk this is being weird...
-    dmnd-bot = nur-pkgs.repos.zeratax.dmnd-bot.overrideAttrs (old: rec {
-      src = ~/git/dmnd-bot;
-      preCheck = ''
-        echo "creating test certs..."
-        pushd spec/test_certs/
-        bash create_certs.sh
-        popd
-        echo "done!"
-      '';
-    });
+    dmnd-bot = nur-pkgs.repos.zeratax.dmnd-bot.overrideAttrs (old: rec
+      {} // optionalAttrs (builtins.pathExists ~/git/dmnd-bot) {
+        src = ~/git/dmnd-bot;
+        preCheck = ''
+          echo "creating test certs..."
+          pushd spec/test_certs/
+          bash create_certs.sh
+          popd
+          echo "done!"
+        '';
+      }
+    );
   };
 
   # open ports to host e.g. a dynmap
@@ -134,8 +136,8 @@ in
     };
 
     additionalSettingsFiles = {
-      "paper.yml" = recursiveUpdate paper-defaults {
-        settings.unsupported-settings = {
+      "config/paper-global.yml" = recursiveUpdate paper-defaults {
+        unsupported-settings = {
           allow-permanent-block-break-exploits = true;
           allow-piston-duplication = true;
         };

@@ -57,7 +57,7 @@ in
       };
 
       repository = "s3:https://s3.amazonaws.com/dmnd-backup/mc-worlds";
-      s3CredentialsFile = config.deployment.keys.aws-secrets.path;
+      environmentFile = config.deployment.keys.aws-secrets.path;
       passwordFile = config.deployment.keys.restic-password.path;
 
       initialize = true;

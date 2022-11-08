@@ -1,5 +1,9 @@
 {
-  network.description = "Minecraft Server";
+  network = {
+    description = "Minecraft Server";
+    enableRollback = true;
+    storage.legacy = {};
+  };
   minecraft =
     { config, pkgs, ... }:
     { 
