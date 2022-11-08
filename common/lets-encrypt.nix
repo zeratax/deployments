@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 
 {
-    security.acme.email = "cert@zera.tax";
+    security.acme.defaults.email = "cert@zera.tax";
     security.acme.acceptTerms = true;
 }
