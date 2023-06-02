@@ -68,26 +68,27 @@ cat << EOF > /mnt/etc/nixos/configuration.nix
         boot.cleanTmpDir = true;
         boot.kernelModules = [ "dm-snapshot" ];
 
-        nixpkgs.config.allowUnfree = true;
         networking.hostName = "nixos";
-        time.timeZone = "NZ";
+        networking.enableIPv6 = true;
+        networking.networkmanager.enable = true;
+
+        nixpkgs.config.allowUnfree = true;
+
+        time.timeZone = "Europe/Berlin";
 
         environment.systemPackages = with pkgs; [
             curl
             firefox
             git
-            ntfs3g
+            vim
         ];
 
         services.openssh.enable = true;
-        services.openssh.passwordAuthentication = false;
 
         services.xserver.enable = true;
         services.xserver.windowManager.i3.enable = true;
 
-        services.cron.mailto = "root";
-
-        system.stateVersion = "20.03"; # Did you read the comment?
+        system.stateVersion = "23.05";
     }
 EOF
 

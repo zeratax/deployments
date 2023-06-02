@@ -8,7 +8,7 @@ create a basic system by booting into a NixOS live cd and editing and running
 
 ## required channels
 After a successfull install we want these or newer channels:
- - nixos https://nixos.org/channels/nixos-21.05
+ - nixos https://nixos.org/channels/nixos-23.05
  - nixos-hardware https://github.com/NixOS/nixos-hardware/archive/master.tar.gz
  - nixos-unstable https://nixos.org/channels/nixos-unstable
 
