@@ -1,0 +1,9 @@
+# Also see https://github.com/Mic92/dotfiles/blob/master/nixos/.sops.yaml
+# for a more complex example.
+keys:
+  - &zeratax age1c05rg28fldxr7k79eree7cktthqjmtm38unc62uhkz0rckfs0f9qpha8hq
+creation_rules:
+  - path_regex: gestalt/secrets\.yaml$
+    key_groups:
+    - age:
+      - *zeratax

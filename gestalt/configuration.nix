@@ -12,6 +12,7 @@ in
       # ./pci-passthrough.nix
     ] ++ lib.optionals (builtins.pathExists /etc/nixos/cachix) [ ./cachix.nix ];
 
+  boot.supportedFilesystems = [ "ntfs" ];
 
   ################### Nix Configuration ###################
   nix = {

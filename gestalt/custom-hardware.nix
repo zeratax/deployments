@@ -5,7 +5,7 @@ in
 {
   imports = [
     <nixos-hardware/common/pc/ssd>
-    <nixos-hardware/common/cpu/intel>
+    # <nixos-hardware/common/cpu/intel>
     <nixos-unstable/nixos/modules/hardware/video/nvidia.nix>
   ];
 
