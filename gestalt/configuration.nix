@@ -165,6 +165,10 @@ in
   services.mullvad-vpn.enable = true;
   networking.firewall.checkReversePath = "loose"; # https://github.com/NixOS/nixpkgs/issues/113589
 
+  services.tailscale = {
+    enable = true;
+  };
+
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
