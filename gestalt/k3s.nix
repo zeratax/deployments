@@ -220,6 +220,7 @@ in
       host all all fe80::/10 trust
       host all all ${kubeMasterGateway}/24 trust
       host all all 10.42.0.1/24 trust
+      host all all 100.64.0.0/10 trust
     '';
     initialScript = pkgs.writeText "backend-initScript" ''
       CREATE DATABASE slotdb;
