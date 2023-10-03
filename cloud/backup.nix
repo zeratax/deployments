@@ -2,19 +2,26 @@
 
 let
   ssh-fingerprint = builtins.readFile ./id_ed25519.pub;
+  postgres-user = config.users.users.postgres.name;
+  postgres-group = config.users.groups.postgres.name;
 in {
   deployment.keys.aws-secrets.text = builtins.readFile ./aws-secrets.key;
-  deployment.keys.ssh-key.text = builtins.readFile ./id_ed25519.key;
+  deployment.keys.ssh-key = {
+    text = builtins.readFile ./id_ed25519.key;
+    # user = postgres-user;
+    # group = postgres-group;
+    # permissions = "0644";
+  };
 
   systemd.services.dbBackup = {
     serviceConfig = {
       EnvironmentFile = config.deployment.keys.aws-secrets.path;
-      User = "postgres";
+      User = postgres-user;
       Type = "oneshot";
     };
     script = ''
     today=$(date +"%Y%m%d")
-    expire=$(date -d "02:30 today + 30 days" --utc +'%Y-%m-%dT%H:%M:%SZ')
+    expire=$(date -d "02:30 today + 90 days" --utc +'%Y-%m-%dT%H:%M:%SZ')
     ${pkgs.postgresql_11}/bin/pg_dump \
       -U postgres \
       -Fc nextcloud | \
@@ -39,7 +46,7 @@ in {
     };
     serviceConfig = {
       EnvironmentFile = config.deployment.keys.aws-secrets.path;
-      User = "postgres";
+      User = "root";
       Type = "oneshot";
     };
     script = ''
@@ -49,8 +56,8 @@ in {
       ${pkgs.age}/bin/age \
         --decrypt \
         -i "${config.deployment.keys.ssh-key.path}" | \
-      ${pkgs.postgresql_11}/bin/pg_restore \
-        -U postgres
+      ${config.services.postgresql.package}/bin/pg_restore \
+        -U postgres \
         --clean \
         --dbname nextcloud
     '';

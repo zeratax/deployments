@@ -4,7 +4,11 @@ let
 
 in
 {
-  deployment.keys.storage-box-webdav-pass.text = builtins.readFile ./storage-box-webdav-pass.key;
+  deployment.keys.storage-box-webdav-pass = {
+    text = builtins.readFile ./storage-box-webdav-pass.key;
+    group = "root";
+    user = "root";
+  };
   environment.etc."davfs2/secrets".source = config.deployment.keys.storage-box-webdav-pass.path;
 
   services.davfs2 = {
@@ -14,24 +18,31 @@ in
     '';
   };
 
+  # manually setting these, so we can use them below. otherwise these are autoallocated...
+  users.users.nextcloud.uid = 994; # id -u nextcloud
+  users.groups.nextcloud.gid = 998; # id -g nextcloud
   fileSystems."/var/lib/nextcloud/data" = {
     device = lib.head (builtins.split " " config.deployment.keys.storage-box-webdav-pass.text);
     fsType = "davfs";
     options = [
-      "gid=998" # id -g nextcloud
-      "uid=1000" # id -u nextcloud
+      "gid=${toString config.users.users.nextcloud.uid}"
+      "uid=${toString config.users.groups.nextcloud.gid}"
       "nofail" # if i can't boot i can't fix stuff
       "dir_mode=0770"
       "_netdev" # device requires network 
     ];
   };
 
-  deployment.keys.nextcloud-db-pass.text = builtins.readFile ./nextcloud-db-pass.key;
-  deployment.keys.nextcloud-db-pass.user = config.users.users.nextcloud.name;
-  deployment.keys.nextcloud-db-pass.group = config.users.groups.nextcloud.name;
-  deployment.keys.nextcloud-admin-pass.text = builtins.readFile ./nextcloud-admin-pass.key;
-  deployment.keys.nextcloud-admin-pass.user = config.users.users.nextcloud.name;
-  deployment.keys.nextcloud-admin-pass.group = config.users.groups.nextcloud.name;
+  deployment.keys.nextcloud-db-pass = {
+    text = builtins.readFile ./nextcloud-db-pass.key;
+    user = config.users.users.nextcloud.name;
+    group = config.users.groups.nextcloud.name;
+  };
+  deployment.keys.nextcloud-admin-pass = {
+    text = builtins.readFile ./nextcloud-admin-pass.key;
+    user = config.users.users.nextcloud.name;
+    group = config.users.groups.nextcloud.name;
+  };
   users.users.nextcloud.extraGroups = [ config.users.groups.keys.name ];
 
   networking.firewall = {
@@ -42,21 +53,40 @@ in
   services.nextcloud = {
     enable = true;
     hostName = config.networking.domain;
-
-    # Use HTTPS for links
     https = true;
 
-    # home = "/var/lib/nextcloud";
+    extraApps = with config.services.nextcloud.package.packages.apps; {
+      inherit calendar files_markdown news tasks twofactor_nextcloud_notification twofactor_webauthn unsplash;
+      # generate with https://github.com/NixOS/nixpkgs/tree/master/pkgs/servers/nextcloud/packages
+      twofactor_totp = pkgs.fetchNextcloudApp {
+        # not available for 27 so we have to define it ourselves
+        url = "https://github.com/nextcloud-releases/twofactor_totp/releases/download/v6.4.1/twofactor_totp-v6.4.1.tar.gz";
+        sha256 = "189cwq78dqanqxhsl69dahdkh230zhz2r285lvf0b7pg0sxcs0yc";
+      };
+      music = pkgs.fetchNextcloudApp {
+        url = "https://github.com/owncloud/music/releases/download/v1.8.4/music_1.8.4_for_nextcloud.tar.gz";
+        sha256 = "0cvmj5cnk0wfgraj11rs12g3947fi3cc92kgvf8wam939aaxg6vh";
+      };
+      checksum = pkgs.fetchNextcloudApp {
+        url = "https://github.com/nextcloud-releases/contacts/releases/download/v5.4.0-beta2/contacts-v5.4.0-beta2.tar.gz";
+        sha256 = "0ya1jr3prw7xh9s9zkhki26gbzrh5nir46g2x96vi3nqi2jwascx";
+      };
+      previewgenerator = pkgs.fetchNextcloudApp {
+        url = "https://github.com/nextcloud-releases/previewgenerator/releases/download/v5.3.0/previewgenerator-v5.3.0.tar.gz";
+        sha256 = "0ziyl7kqgivk9xvkd12byps6bb3fvcvdgprfa9ffy1zrgpl9syhk";
+      };
+      maps = pkgs.fetchNextcloudApp {
+        url = "https://github.com/nextcloud/maps/releases/download/v1.1.0-2a-nightly/maps-1.1.0-2a-nightly.tar.gz";
+        sha256 = "0517kakkk7lr7ays6rrnl276709kcm5yvkp8g6cwjnfih7pmnkn9";
+      };
+    };
+    extraAppsEnable = true;
 
-    # Auto-update Nextcloud Apps
-    autoUpdateApps.enable = true;
-    # Set what time makes sense for you
-    autoUpdateApps.startAt = "05:00:00";
-
-    package = pkgs.nextcloud23;
+    package = pkgs.nextcloud27;
 
     maxUploadSize = "10G";
 
+    configureRedis = true;
     config = {
       # Further forces Nextcloud to use HTTPS
       overwriteProtocol = "https";
@@ -72,6 +102,7 @@ in
       adminuser = "admin";
 
       defaultPhoneRegion = "DE";
+
     };
 
     poolSettings = {
@@ -92,12 +123,18 @@ in
   services.postgresql = {
     enable = true;
 
+    package = pkgs.postgresql_15;
+
     # Ensure the database, user, and permissions always exist
     ensureDatabases = [ "nextcloud" ];
     ensureUsers = [
       {
         name = "nextcloud";
-        ensurePermissions."DATABASE nextcloud" = "ALL PRIVILEGES";
+        ensurePermissions = {
+          "DATABASE nextcloud" = "ALL PRIVILEGES";
+          "ALL TABLES IN SCHEMA public" = "ALL PRIVILEGES";
+          "SCHEMA public" = "CREATE";
+        };
       }
     ];
   };

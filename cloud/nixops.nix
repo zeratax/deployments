@@ -1,5 +1,12 @@
 {
-  network.description = "Cloud Storage";
+  network = {
+    description = "Cloud Storage";
+    enableRollback = true;
+    storage.legacy = {
+      databasefile = "~/.nixops/deployments.nixops";
+    };
+  };
+
   cloud =
     { config, pkgs, ... }:
     { 
