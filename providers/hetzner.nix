@@ -8,9 +8,8 @@
     boot.kernelModules = [ ];
     boot.extraModulePackages = [ ];
 
-    boot.cleanTmpDir = true;
+    boot.tmp.cleanOnBoot = true;
     boot.loader.grub.enable = true;
-    boot.loader.grub.version = 2;
     boot.loader.grub.devices = [ "/dev/sda" ];
 
     fileSystems."/" =
