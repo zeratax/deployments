@@ -28,6 +28,10 @@ in
     };
   };
 
+  environment.systemPackages = with pkgs; [
+   speedtest-cli
+  ];
+
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [
