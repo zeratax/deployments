@@ -1,13 +1,11 @@
 { pkgs, config, lib, ... }:
-with lib;
 let
   nur-pkgs = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
     inherit pkgs;
-    repoOverrides = {} // optionalAttrs (builtins.pathExists ~/git/nur-packages) {
-      zeratax = import ~/git/nur-packages {};
+    repoOverrides = { } // lib.optionalAttrs (builtins.pathExists ~/git/nur-packages) {
+      zeratax = import ~/git/nur-packages { };
     };
   };
-  pkgsUnstable = import <nixos-unstable> { };
 
   plugins = config.services.bukkit-plugins.plugins;
   dynmap-defaults = import ./plugin-settings/dynmap.nix { };
@@ -16,11 +14,11 @@ let
   paper-defaults = import ./plugin-settings/paper.nix { };
 
   # this seems dumb
-  mcVersion = "1.19.2";
-  buildNum = "263";
+  mcVersion = "1.20.2";
+  buildNum = "297";
   papermcjar = pkgs.fetchurl {
     url = "https://papermc.io/api/v2/projects/paper/versions/${mcVersion}/builds/${buildNum}/downloads/paper-${mcVersion}-${buildNum}.jar";
-    sha256 = "41efcfe984c4aef2ef37a2d03f0a50f8b2d6d094ebb7891139890ab79b2ac3ff";
+    sha256 = "sha256-2umWiyZmhwGeoitl0Y4IqjClDGNop5cGlcy+x+C7VBI=";
   };
   newpapermc = pkgs.papermc.overrideAttrs (old: {
     version = "${mcVersion}r${buildNum}";
@@ -30,12 +28,13 @@ let
     '';
   });
   
+
   dynmapjar = pkgs.fetchurl {
-    url = "https://dynmap.us/releases/Dynmap-3.4-spigot.jar";
-    sha256 = "06c7xmpi7v92linjqpbdqncm536v64791i6vc20kww2anybfp045";
+    url = "https://cdn.modrinth.com/data/fRQREgAc/versions/UXqPUg7D/Dynmap-3.7-beta-2-spigot.jar";
+    sha256 = "0n5cqyqryx1dak9fdd45rpdjxsgzxvndi3p17ngb0x4x0ib19vjp";
   };
-  newdynmap = nur-pkgs.repos.zeratax.bukkitPlugins.dynmap.overrideAttrs (old: rec {
-    version = "3.4";
+  newdynmap = nur-pkgs.repos.zeratax.bukkitPlugins.dynmap.overrideAttrs (old: {
+    version = "3.7-beta-2";
     installPhase = ''
       mkdir -p $out
       cp ${dynmapjar} $out/dynmap.jar
@@ -136,7 +135,7 @@ in
     };
 
     additionalSettingsFiles = {
-      "config/paper-global.yml" = recursiveUpdate paper-defaults {
+      "config/paper-global.yml" = lib.recursiveUpdate paper-defaults {
         unsupported-settings = {
           allow-permanent-block-break-exploits = true;
           allow-piston-duplication = true;
@@ -158,7 +157,7 @@ in
       };
       dynmap = {
         package = newdynmap; #nur-pkgs.repos.zeratax.bukkitPlugins.dynmap;
-        settings = recursiveUpdate dynmap-defaults {
+        settings = lib.recursiveUpdate dynmap-defaults {
           # overwrite defaults here
         };
       };

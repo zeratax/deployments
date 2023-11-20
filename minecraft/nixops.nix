@@ -1,26 +1,33 @@
+{ apiToken ? "changeme"
+, location ? "nbg1"
+}:
 {
   network = {
     description = "Minecraft Server";
     enableRollback = true;
-    storage.legacy = {};
+    storage.legacy = {
+      databasefile = "~/.nixops/deployments.nixops";
+    };
   };
   minecraft =
     { config, pkgs, ... }:
-    { 
-        deployment.targetHost = "mc.dmnd.sh";
+    {
+      deployment.targetEnv = "hetznercloud";
+      deployment.hetznerCloud = {
+        inherit apiToken location;
+        serverType = "cx21";
+      };
 
-        imports = [
-            ../providers/hetzner.nix
-            ../common/ssh.nix
-            ../common/lets-encrypt.nix
-            # ./networking.nix
-            ./backup.nix
-            ./minecraft.nix
-        ];
+      imports = [
+        ../common/ssh.nix
+        ../common/lets-encrypt.nix
+        ./backup.nix
+        ./minecraft.nix
+      ];
 
-        networking = {
-          hostName = "minecraft";
-          domain = config.deployment.targetHost;
-        };
+      networking = {
+        hostName = "minecraft";
+        domain = "mc.dmnd.sh";
+      };
     };
 }
