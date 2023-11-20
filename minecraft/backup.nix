@@ -42,10 +42,13 @@ in
         "${mc-dir}/cinnabar/"
         "${mc-dir}/cinnabar_nether/"
         "${mc-dir}/cinnabar_the_end/"
+        "${mc-dir}/cairngorm/"
+        "${mc-dir}/cairngorm_nether/"
+        "${mc-dir}/cairngorm_the_end/"
         "${mc-dir}/redstone_logic_world/"
         "${mc-dir}/Miliarium/"
       ];
-      
+
       timerConfig = {
         OnCalendar = "*-*-* 3:30:00";
         Persistent = true;

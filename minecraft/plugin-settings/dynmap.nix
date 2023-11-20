@@ -1,4 +1,4 @@
-{ }:
+{}:
 {
   "dynmap/configuration.txt" = {
     allow-symlinks = true;
