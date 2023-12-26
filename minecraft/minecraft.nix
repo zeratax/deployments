@@ -96,8 +96,12 @@ in {
       max-players = 20;
       online-mode = true;
 
-      resource-pack = "https://cloud.dmnd.sh/s/q3P9FwKew3QRkbJ/download?path=%2F&files=John%20Smith%20Legacy%20JSC%201.20.2%20v6.zip";
-      resource-pack-sha1 = "B04757FF80268FC144996EE16EC214FB330AE276";
+      # resource-pack = "https://cloud.dmnd.sh/s/q3P9FwKew3QRkbJ/download?path=%2F&files=John%20Smith%20Legacy%20JSC%201.20.2%20v6.zip";
+      # resource-pack-sha1 = "B04757FF80268FC144996EE16EC214FB330AE276";
+      resource-pack =
+        "https://cloud.dmnd.sh/s/q3P9FwKew3QRkbJ/download?path=%2F&files=dmnd-v1.0.zip";
+      resource-pack-sha1 = "60E6E7B821BD580BA09A50C9700DA4893143E232";
+      require-resource-pack = true;
     };
 
     additionalSettingsFiles = {
