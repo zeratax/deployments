@@ -91,7 +91,8 @@ in {
       broadcast-console-to-ops = true;
       op-permission-level = 4;
 
-      view-distance = 16;
+      view-distance = 30;
+      entity-broadcast-range-percentage = 200;
       max-players = 20;
       online-mode = true;
 
