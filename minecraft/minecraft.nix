@@ -38,57 +38,11 @@ let
       cp ${dynmapjar} $out/dynmap.jar
     '';
   });
-  # discordsrvjar = pkgs.fetchurl {
-  #   url = "https://nexus.scarsz.me/service/local/repositories/snapshots/content/com/discordsrv/discordsrv/1.26.1-SNAPSHOT/discordsrv-1.26.1-20221030.044726-8.jar";
-  #   sha256 = "1a692s0kpgcjz5r77rqkdcma8srcya0pl6c2pl6ii1hgif0lgnk6";
-  # };
-  # newdiscordsrv = nur-pkgs.repos.zeratax.bukkitPlugins.discordsrv.overrideAttrs (old: rec {
-  #   version = "1.26.1-SNAPSHOT";
-  #   installPhase = ''
-  #     mkdir -p $out
-  #     cp ${discordsrvjar} $out/discordsrv.jar
-  #   '';
-  # });
-
-in
-{
+in {
   imports = [
     nur-pkgs.repos.zeratax.modules.bukkit-plugins
     nur-pkgs.repos.zeratax.modules.bukkit-server
-    # nur-pkgs.repos.zeratax.modules.dmnd-bot
   ];
-
-  # nixpkgs.config.packageOverrides = pkgs: {
-  #   # idk this is being weird...
-  #   dmnd-bot = nur-pkgs.repos.zeratax.dmnd-bot.overrideAttrs (old: rec
-  #     {} // optionalAttrs (builtins.pathExists ~/git/dmnd-bot) {
-  #       src = ~/git/dmnd-bot;
-  #       preCheck = ''
-  #         echo "creating test certs..."
-  #         pushd spec/test_certs/
-  #         bash create_certs.sh
-  #         popd
-  #         echo "done!"
-  #       '';
-  #     }
-  #   );
-  # };
-
-  # services.dmnd-bot = {
-  #   enable = true;
-  #
-  #   settings = {
-  #     discord = {
-  #       id = lib.toInt (builtins.readFile ./discord_id.key);
-  #       token = lib.removeSuffix "\n" (builtins.readFile ./discord_token.key);
-  #     };
-  #     saucenao = {
-  #       enabled = true;
-  #       token = lib.removeSuffix "\n" (builtins.readFile ./saucenao.key);
-  #     };
-  #   };
-  # };
-
   services.bukkit-server = {
     enable = true;
     declarative = true;
@@ -156,7 +110,7 @@ in
       };
       # discordsrv = {
       #   package = newdiscordsrv; #nur-pkgs.repos.zeratax.bukkitPlugins.discordsrv;
-      #   settings = recursiveUpdate discordsrv-defaults {
+      #   settings = lib.recursiveUpdate discordsrv-defaults {
       #     "DiscordSRV/config.yml" = {
       #       BotToken = builtins.readFile ./bot-token.key;
       #       AvatarUrl = "https://crafatar.com/renders/head/{uuid-nodashes}.png?size={size}&overlay#{texture}";
