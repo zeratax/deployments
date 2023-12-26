@@ -1,5 +1,7 @@
-{ pkgs, config, lib, ... }:
+{ pkgs, config, ... }:
 let
+  nixos-unstable = import <nixos-unstable> { };
+
   mc-server = config.services.bukkit-server;
   mc-settings = mc-server.serverProperties;
   mc-dir = mc-server.dataDir;
@@ -9,10 +11,53 @@ let
       -H localhost \
       -p ${builtins.toString mc-settings."rcon.port"} \
       -P ${mc-settings."rcon.password"}'';
-in
-{
+
+  mcWorlds = [
+    {
+      name = "Miliarium";
+      isDefaultLevelType = false;
+    }
+    {
+      name = "alexandrite";
+      isDefaultLevelType = true;
+    }
+    {
+      name = "cairngorm";
+      isDefaultLevelType = true;
+    }
+    {
+      name = "cinnabar";
+      isDefaultLevelType = true;
+    }
+    {
+      name = "phosphophyllite";
+      isDefaultLevelType = true;
+    }
+    {
+      name = "redstone_logic_world";
+      isDefaultLevelType = false;
+    }
+    {
+      name = "skyrim";
+      isDefaultLevelType = true;
+    }
+  ];
+
+  makePaths = world:
+    let
+      base = [ "${mc-dir}/${world.name}/" ];
+      extraPaths = if world.isDefaultLevelType then [
+        "${mc-dir}/${world.name}_nether/"
+        "${mc-dir}/${world.name}_the_end/"
+      ] else
+        [ ];
+    in base ++ extraPaths;
+
+  worldPaths = builtins.concatLists (builtins.map makePaths mcWorlds);
+in {
   deployment.keys.aws-secrets.text = builtins.readFile ./aws-secrets.key;
-  deployment.keys.restic-password.text = builtins.readFile ./restic-password.key;
+  deployment.keys.restic-password.text =
+    builtins.readFile ./restic-password.key;
 
   systemd.services.worldBackupFailure = {
     serviceConfig = {
@@ -22,31 +67,22 @@ in
     script = ''
       ${rcon} <<EOS
         save-on
-        say ...backup restore failed!
+        say ...backup failed!
       EOS
     '';
   };
 
+  # restic seems to be broken with s3 in 23.05
+  nixpkgs.config.packageOverrides = pkgs: { restic = nixos-unstable.restic; };
+
   services.restic.backups = {
     mc-worlds = {
-      paths = [
-        "${mc-dir}/${mc-settings.level-name}/"
-        "${mc-dir}/${mc-settings.level-name}_nether/"
-        "${mc-dir}/${mc-settings.level-name}_the_end/"
-        "${mc-dir}/alexandrite/"
-        "${mc-dir}/alexandrite_nether/"
-        "${mc-dir}/alexandrite_the_end/"
-        "${mc-dir}/phosphophyllite/"
-        "${mc-dir}/phosphophyllite_nether/"
-        "${mc-dir}/phosphophyllite_the_end/"
-        "${mc-dir}/cinnabar/"
-        "${mc-dir}/cinnabar_nether/"
-        "${mc-dir}/cinnabar_the_end/"
-        "${mc-dir}/cairngorm/"
-        "${mc-dir}/cairngorm_nether/"
-        "${mc-dir}/cairngorm_the_end/"
-        "${mc-dir}/redstone_logic_world/"
-        "${mc-dir}/Miliarium/"
+      paths = worldPaths ++ [
+        "${mc-dir}/bluemap/web/assets/*.png"
+        "${mc-dir}/ops.json"
+        "${mc-dir}/plugins/BlueMap/"
+        "${mc-dir}/plugins/PaperTweaks/sqlite.db"
+        "${mc-dir}/plugins/PaperTweaks/mv.db"
       ];
 
       timerConfig = {
@@ -80,7 +116,7 @@ in
   };
 
   systemd.services."restoreBackup@" = {
-    onFailure = [ "worldBackupFailure.service" ];
+    description = "Restore to a specific Restic Snapshot";
     conflicts = [ "bukkit-server.service" ];
     environment = {
       SNAPSHOT_ID = "%i";
@@ -93,8 +129,22 @@ in
     };
     script = ''
       ${pkgs.restic}/bin/restic restore $SNAPSHOT_ID --target /
-      ${pkgs.systemd}/bin/systemctl restart bukkit-server.service
+      # ${pkgs.systemd}/bin/systemctl restart bukkit-server.service
     '';
+  };
 
+  systemd.services."listBackups" = {
+    description = "List all Restic Snapshots";
+    environment = {
+      RESTIC_REPOSITORY = config.services.restic.backups.mc-worlds.repository;
+    };
+    serviceConfig = {
+      EnvironmentFile = config.deployment.keys.aws-secrets.path;
+      User = "minecraft";
+      Type = "oneshot";
+    };
+    script = ''
+      ${pkgs.restic}/bin/restic snapshots
+    '';
   };
 }
