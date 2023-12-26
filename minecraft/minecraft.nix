@@ -1,11 +1,13 @@
 { pkgs, config, lib, ... }:
 let
-  nur-pkgs = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
-    inherit pkgs;
-    repoOverrides = { } // lib.optionalAttrs (builtins.pathExists ~/git/nur-packages) {
-      zeratax = import ~/git/nur-packages { };
+  nur-pkgs = import (builtins.fetchTarball
+    "https://github.com/nix-community/NUR/archive/master.tar.gz") {
+      inherit pkgs;
+      repoOverrides = { }
+        // lib.optionalAttrs (builtins.pathExists ~/git/nur-packages) {
+          zeratax = import ~/git/nur-packages { };
+        };
     };
-  };
 
   # plugins = config.services.bukkit-plugins.plugins;
   # dynmap-defaults = import ./plugin-settings/dynmap.nix { };
@@ -86,7 +88,8 @@ in {
       enable-query = true;
       enable-rcon = true;
       "rcon.port" = 25575;
-      "rcon.password" = builtins.readFile ./rcon-password.key;
+      "rcon.password" =
+        lib.removeSuffix "\n" (builtins.readFile ./rcon-password.key);
       broadcast-rcon-to-ops = true;
       broadcast-console-to-ops = true;
       op-permission-level = 4;
@@ -121,8 +124,6 @@ in {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.bluemap;
         settings = { };
       };
-      simple-voice-chat = {
-        package = nur-pkgs.repos.zeratax.bukkitPlugins.simple-voice-chat;
       bluemap-marker-manager = {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.bluemap-marker-manager;
         settings = { };
@@ -176,13 +177,19 @@ in {
       #     # overwrite defaults here
       #   };
       # };
+      simple-voice-chat = {
+        package = nur-pkgs.repos.zeratax.bukkitPlugins.simple-voice-chat;
+        settings = { };
+      };
     };
   };
 
   # open ports to host e.g. a dynmap
   networking.firewall = {
     allowedTCPPorts = [ 80 443 ];
-    allowedUDPPorts = [ 24454 ]; # for simple voice chat https://modrepo.de/minecraft/voicechat/wiki/server_setup_self_hosted
+    allowedUDPPorts = [
+      24454
+    ]; # for simple voice chat https://modrepo.de/minecraft/voicechat/wiki/server_setup_self_hosted
     allowPing = true;
   };
 
