@@ -1,8 +1,9 @@
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-23.05";
+    nixpkgs.url = "nixpkgs/nixos-23.11";
     flake-utils.url = "github:numtide/flake-utils";
-    nixops.url = "github:talyz/nixops/mapping-types";
+    nixops.url = "github:NixOS/nixops";
+    nixops.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, flake-utils, nixops }:
@@ -26,6 +27,7 @@
           buildInputs = [
             nixops_unstable
           ];
+          NIXOPS_STATE = "./statefile/deployments.nixops";
         };
 
         formatter = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;

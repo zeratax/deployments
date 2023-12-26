@@ -3,7 +3,6 @@
 let
   ssh-fingerprint = builtins.readFile ./id_ed25519.pub;
   postgres-user = config.users.users.postgres.name;
-  postgres-group = config.users.groups.postgres.name;
 in {
   deployment.keys.aws-secrets.text = builtins.readFile ./aws-secrets.key;
   deployment.keys.ssh-key = {
@@ -22,7 +21,7 @@ in {
     script = ''
     today=$(date +"%Y%m%d")
     expire=$(date -d "02:30 today + 90 days" --utc +'%Y-%m-%dT%H:%M:%SZ')
-    ${pkgs.postgresql_11}/bin/pg_dump \
+    ${config.services.postgresql.package}/bin/pg_dump \
       -U postgres \
       -Fc nextcloud | \
     ${pkgs.age}/bin/age \
@@ -46,7 +45,7 @@ in {
     };
     serviceConfig = {
       EnvironmentFile = config.deployment.keys.aws-secrets.path;
-      User = "root";
+      User = "root"; # i assume i did this because of permission issues, but should be investigated more
       Type = "oneshot";
     };
     script = ''
