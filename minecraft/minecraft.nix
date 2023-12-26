@@ -11,22 +11,19 @@ let
   # dynmap-defaults = import ./plugin-settings/dynmap.nix { };
   # discordsrv-defaults = import ./plugin-settings/discordsrv.nix { };
   paper-defaults = import ./plugin-settings/paper.nix { };
-
-  # this seems dumb
-  mcVersion = "1.20.2";
-  buildNum = "297";
-  papermcjar = pkgs.fetchurl {
-    url = "https://papermc.io/api/v2/projects/paper/versions/${mcVersion}/builds/${buildNum}/downloads/paper-${mcVersion}-${buildNum}.jar";
-    sha256 = "sha256-2umWiyZmhwGeoitl0Y4IqjClDGNop5cGlcy+x+C7VBI=";
-  };
-  newpapermc = pkgs.papermc.overrideAttrs (old: {
-    version = "${mcVersion}r${buildNum}";
-    installPhase = ''
-      install -Dm444 ${papermcjar} $out/share/papermc/papermc.jar
-      install -Dm555 -t $out/bin minecraft-server
-    '';
   paper-tweaks-defaults = import ./plugin-settings/paper-tweaks.nix { };
 
+  newpapermc = pkgs.papermc.overrideAttrs (old: rec {
+    version = "1.20.4.328";
+    # url is wrong in nixpkgs
+    src = let
+      mcVersion = lib.versions.pad 3 version;
+      buildNum = builtins.elemAt (lib.splitVersion version) 3;
+    in pkgs.fetchurl {
+      url =
+        "https://api.papermc.io/v2/projects/paper/versions/${mcVersion}/builds/${buildNum}/downloads/paper-${mcVersion}-${buildNum}.jar";
+      sha256 = "sha256-wpyu8SONCDhrcFcBV8smkJ+/s6wyYtVCNPzLZt+5aQM=";
+    };
   });
 
 in {
