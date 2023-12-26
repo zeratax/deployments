@@ -25,6 +25,8 @@ let
       install -Dm444 ${papermcjar} $out/share/papermc/papermc.jar
       install -Dm555 -t $out/bin minecraft-server
     '';
+  paper-tweaks-defaults = import ./plugin-settings/paper-tweaks.nix { };
+
   });
 
 in {
@@ -127,6 +129,20 @@ in {
         package =
           nur-pkgs.repos.zeratax.bukkitPlugins.bluemap-offline-player-markers;
         settings = { };
+      };
+      paper-tweaks = {
+        package = nur-pkgs.repos.zeratax.bukkitPlugins.paper-tweaks;
+        # TODO: Should probably just be stateful and backuped
+        settings = lib.recursiveUpdate paper-tweaks-defaults {
+          "PaperTweaks/modules.yml" = {
+            survival = {
+              afk-display = true;
+              coordinates-hud = true;
+              graves = true;
+              track-raw-stats = true;
+            };
+          };
+        };
       };
       # discordsrv = {
       #   package = newdiscordsrv; #nur-pkgs.repos.zeratax.bukkitPlugins.discordsrv;
