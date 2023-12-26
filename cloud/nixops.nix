@@ -2,9 +2,7 @@
   network = {
     description = "Cloud Storage";
     enableRollback = true;
-    storage.legacy = {
-      databasefile = "~/.nixops/deployments.nixops";
-    };
+    storage.legacy = {};
   };
 
   cloud =
