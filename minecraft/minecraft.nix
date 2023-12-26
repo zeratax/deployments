@@ -7,8 +7,8 @@ let
     };
   };
 
-  plugins = config.services.bukkit-plugins.plugins;
-  dynmap-defaults = import ./plugin-settings/dynmap.nix { };
+  # plugins = config.services.bukkit-plugins.plugins;
+  # dynmap-defaults = import ./plugin-settings/dynmap.nix { };
   # discordsrv-defaults = import ./plugin-settings/discordsrv.nix { };
   paper-defaults = import ./plugin-settings/paper.nix { };
 
@@ -27,17 +27,6 @@ let
     '';
   });
 
-  dynmapjar = pkgs.fetchurl {
-    url = "https://cdn.modrinth.com/data/fRQREgAc/versions/UXqPUg7D/Dynmap-3.7-beta-2-spigot.jar";
-    sha256 = "0n5cqyqryx1dak9fdd45rpdjxsgzxvndi3p17ngb0x4x0ib19vjp";
-  };
-  newdynmap = nur-pkgs.repos.zeratax.bukkitPlugins.dynmap.overrideAttrs (old: {
-    version = "3.7-beta-2";
-    installPhase = ''
-      mkdir -p $out
-      cp ${dynmapjar} $out/dynmap.jar
-    '';
-  });
 in {
   imports = [
     nur-pkgs.repos.zeratax.modules.bukkit-plugins
@@ -98,14 +87,19 @@ in {
   services.bukkit-plugins = {
     enable = true;
     plugins = {
-      dynmap = {
-        package = newdynmap; #nur-pkgs.repos.zeratax.bukkitPlugins.dynmap;
-        settings = lib.recursiveUpdate dynmap-defaults {
-          # overwrite defaults here
-        };
+      bluemap = {
+        package = nur-pkgs.repos.zeratax.bukkitPlugins.bluemap;
+        settings = { };
       };
       simple-voice-chat = {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.simple-voice-chat;
+      bluemap-marker-manager = {
+        package = nur-pkgs.repos.zeratax.bukkitPlugins.bluemap-marker-manager;
+        settings = { };
+      };
+      bluemap-offline-player-markers = {
+        package =
+          nur-pkgs.repos.zeratax.bukkitPlugins.bluemap-offline-player-markers;
         settings = { };
       };
       # discordsrv = {
@@ -132,6 +126,12 @@ in {
       #     };
       #   };
       # };
+      # dynmap = {
+      #   package = newdynmap; #nur-pkgs.repos.zeratax.bukkitPlugins.dynmap;
+      #   settings = lib.recursiveUpdate dynmap-defaults {
+      #     # overwrite defaults here
+      #   };
+      # };
     };
   };
 
@@ -154,7 +154,8 @@ in {
       enableACME = true;
 
       locations."/" = {
-        proxyPass = "http://localhost:${builtins.toString plugins.dynmap.settings."dynmap/configuration.txt".webserver-port}";
+        # proxyPass = "http://localhost:${builtins.toString plugins.dynmap.settings."dynmap/configuration.txt".webserver-port}";
+        proxyPass = "http://localhost:8100/";
       };
     };
   };
