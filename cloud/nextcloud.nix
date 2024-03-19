@@ -1,5 +1,10 @@
   { pkgs, config, lib, ... }:
 {
+  deployment.keys.smtp-pass = {
+    text = builtins.readFile ./smtp-pass.key;
+    group = config.users.groups.nextcloud.name;
+    user = config.users.users.nextcloud.name;
+  };
   deployment.keys.storage-box-webdav-pass = {
     text = builtins.readFile ./storage-box-webdav-pass.key;
     group = "root";
@@ -16,8 +21,8 @@
 
   # manually setting these, so we can use them below. otherwise these are autoallocated...
   users.users.nextcloud.group = "nextcloud";
-  users.users.nextcloud.uid = 994; # id -u nextcloud
-  users.groups.nextcloud.gid = 998; # id -g nextcloud
+  users.users.nextcloud.uid = 399; # id -u nextcloud
+  users.groups.nextcloud.gid = 399; # id -g nextcloud
   fileSystems."/var/lib/nextcloud/data" = {
     device = lib.head (builtins.split " " config.deployment.keys.storage-box-webdav-pass.text);
     fsType = "davfs";
@@ -125,6 +130,8 @@
       defaultPhoneRegion = "DE";
     };
 
+    phpOptions."opcache.interned_strings_buffer" = "23";
+
     poolSettings = {
       "pm" = "dynamic";
       "pm.max_children" = "64";
@@ -132,6 +139,19 @@
       "pm.min_spare_servers" = "7";
       "pm.max_spare_servers" = "14";
       "pm.max_requests" = "500";
+    };
+  };
+
+  programs.msmtp = {
+    enable = true;
+    accounts.default = {
+      host = "smtp.zoho.com";
+      from = "contact@dmnd.sh";
+      user = "admin@misaki.moe";
+      port = 587;
+      tls = true;
+      auth = true;
+      passwordeval = "cat ${config.deployment.keys.smtp-pass.path}";
     };
   };
 
