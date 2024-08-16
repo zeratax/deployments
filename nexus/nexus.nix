@@ -7,6 +7,7 @@ in
   services.nginx = {
     enable = true;
     recommendedProxySettings = true;
+    proxyTimeout = "600s";
     virtualHosts."${config.networking.fqdn}" = {
       enableACME = true;
       forceSSL = true;
