@@ -51,6 +51,9 @@ in
   # Enable networking
   networking.networkmanager.enable = true;
 
+  # Add fritz box selfsigned cert
+  security.pki.certificates = [ (builtins.readFile ./certs/myFRITZBox.crt) ];
+
   ################### l10n ###################
   console = {
     font = "Lat2-Terminus16";

@@ -1,0 +1,20 @@
+[ req ]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = fritz.box
+DNS.2 = www.fritz.box
+DNS.3 = myfritz.box
+DNS.4 = www.myfritz.box
+DNS.5 = fritz.nas
+DNS.6 = www.fritz.nas
+IP.1 = 192.168.188.1
+IP.2 = 2001:9e8:df2c:9dfc:be05:43ff:fef2:9342
+
+[ req_distinguished_name ]
