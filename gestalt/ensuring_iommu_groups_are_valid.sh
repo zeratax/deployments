@@ -1,4 +1,6 @@
-#!/bin/bash
+#! /usr/bin/env nix-shell
+#! nix-shell -i bash -p bash pciutils
+
 # This is a slightly modified version of the script found at 
 #    https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Ensuring_that_the_groups_are_valid
 # It adds a tab to make the output prettier and sorts the output per-group

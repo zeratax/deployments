@@ -1,22 +1,44 @@
 { pkgs, lib, config, ... }:
 let
+  ### Variables:
   kubeMasterIP = "192.168.188.89";
   kubeMasterGateway = "192.168.188.1";
   kubeMasterHostname = "gestalt.local";
   kubeMasterAPIServerPort = 6443;
-  # kubeMasterCAPort = 6444;
+  kubeMasterInterface = "eno1";
+  kubeMasterMacVlanInterface = "mv-${kubeMasterInterface}";
+
+  kubeAgents = 5;
+
+  # since we need this file to be visible at evaluation for host
+  # as well as all containers we need an absolute path
+  # that is the same on the all systems
+  tokenFile = builtins.toPath ./k3s-server-token.key;
 
   nexusProxyRepoPort = 8082;
 
+  ## Certificates
+  # needs to be created manually
   certPath = ./certs/selfsigned.crt;
   certKeyPath = ./certs/selfsigned.key;
 
-  certfile = builtins.readFile certPath; # need to be created manually
+  certfile = builtins.readFile certPath;
+
+
+  ### Containers
+  subnet = builtins.head (builtins.match "([0-9]+\\.[0-9]+\\.[0-9]+)\\.[0-9]+" kubeMasterGateway);
+
+  kubeContainers = map 
+    (idx: let ipEnding = 100 + idx; 
+          in lib.attrsets.nameValuePair 
+            ("kube${toString idx}") 
+            (mkNode { ip = "${subnet}.${toString ipEnding}"; }))
+    (lib.lists.range 1 kubeAgents);
 
   mkNode = { ip }: {
     # use macvlan
     autoStart = true;
-    macvlans = [ "eno1" ];
+    macvlans = [ kubeMasterInterface ];
     timeoutStartSec = "10min";
 
     # enable nested containers https://wiki.archlinux.org/title/systemd-nspawn#Run_docker_in_systemd-nspawn
@@ -29,14 +51,20 @@ let
     allowedDevices = [
       { node = "/dev/fuse"; modifier = "rwm"; }
       { node = "/dev/mapper/control"; modifier = "rwm"; }
-      { node = "/dev/console"; modifier = "rwm"; }
+      { node = "/dev/consotruele"; modifier = "rwm"; }
+      { node = "/dev/kmsg"; modifier = "rwm"; }
     ];
 
     bindMounts = {
       k3s-token = {
-        hostPath = "${toString config.services.k3s.tokenFile}";
-        mountPoint = "/home/jonaa/git/deployments/gestalt/k3s-server-token.key";
+        hostPath = tokenFile;
+        mountPoint = tokenFile;
         isReadOnly = true;
+      };
+      kmsg = {
+        hostPath = "/dev/kmsg";
+        mountPoint = "/dev/kmsg";
+        isReadOnly = false;
       };
       fuse = { 
         hostPath = "/dev/fuse"; 
@@ -53,16 +81,24 @@ let
         '';
         defaultGateway = kubeMasterGateway;
         interfaces = {
-          mv-eno1.ipv4.addresses = [ { address = ip; prefixLength = 24;}];
+          "${kubeMasterMacVlanInterface}".ipv4.addresses = [ { address = ip; prefixLength = 24;}];
+        };
+        firewall = {
+          enable = true;
+          allowedTCPPorts = [ 
+            config.services.nginx.defaultHTTPListenPort
+            config.services.nginx.defaultSSLListenPort
+          ];
         };
       };
 
+      # self signed certificate for nexus
       security.pki.certificates = [ certfile ];	
 
       services.k3s = {
+        inherit tokenFile;
         enable = true;
         role = "agent";
-        tokenFile = /home/jonaa/git/deployments/gestalt/k3s-server-token.key; # directly use bindMounts value?
         serverAddr = "https://${kubeMasterHostname}:${toString kubeMasterAPIServerPort}";
         extraFlags = "--node-ip ${toString ip}"; # --container-runtime-endpoint unix:///run/containerd/containerd.sock";
       };
@@ -80,21 +116,21 @@ let
 
       # Manually configure nameserver. Using resolved inside the container seems to fail
       # currently
-      environment.etc."resolv.conf".text = "nameserver 192.168.188.1";
+      environment.etc."resolv.conf".text = "nameserver 1.1.1.1";
     };
   };
 in
 {
-  networking = {
+  networking = let kubeMasterMacVlanHostInterface = "${kubeMasterMacVlanInterface}-host"; in {
     defaultGateway = kubeMasterGateway;
     # create macvlan for containers
-    macvlans.mv-eno1-host = {
-      interface = "eno1";
+    macvlans."${kubeMasterMacVlanHostInterface}" = {
+      interface = kubeMasterInterface;
       mode = "bridge";
     };
     interfaces = {
-      eno1.ipv4.addresses = lib.mkForce [];
-      mv-eno1-host.ipv4.addresses = [{ address = kubeMasterIP; prefixLength = 24;}];
+      "${kubeMasterInterface}".ipv4.addresses = lib.mkForce [];
+      "${kubeMasterMacVlanHostInterface}".ipv4.addresses = [{ address = kubeMasterIP; prefixLength = 24;}];
     };
 
     extraHosts = ''
@@ -108,77 +144,24 @@ in
         config.services.nginx.defaultSSLListenPort
         # config.services.nexus.listenPort # to allow accessing over localnetwork
         kubeMasterAPIServerPort
-        9200 # elasticsearch
       ];
     };
   };
 
-  services.avahi = {
-    enable = true;
-    publish = {
-      enable = true;
-      addresses = true;
-      workstation = true;
-    };
-  };
+  ### k8s/k3s
 
   services.k3s = {
+    inherit tokenFile;
     enable = true;
     role = "server";
-    tokenFile = ./k3s-server-token.key;
     extraFlags = "--disable traefik --flannel-backend=host-gw"; # --container-runtime-endpoint unix:///run/containerd/containerd.sock";
   };
 
-  containers.kube1 = mkNode { ip = "192.168.188.101"; };
-  containers.kube2 = mkNode { ip = "192.168.188.102"; };
-  containers.kube3 = mkNode { ip = "192.168.188.103"; };	 
-  containers.kube4 = mkNode { ip = "192.168.188.104"; }; 	
-  containers.kube5 = mkNode { ip = "192.168.188.105"; };	
-  containers.kube6 = mkNode { ip = "192.168.188.106"; };	
-  containers.kube7 = mkNode { ip = "192.168.188.107"; };	
-  containers.kube8 = mkNode { ip = "192.168.188.108"; };	
-  containers.kube9 = mkNode { ip = "192.168.188.109"; };	
-  containers.kube10 = mkNode { ip = "192.168.188.110"; };	
-  containers.kube11 = mkNode { ip = "192.168.188.111"; };	
-  containers.kube12 = mkNode { ip = "192.168.188.112"; };	
-  containers.kube13 = mkNode { ip = "192.168.188.113"; };	
-  containers.kube14 = mkNode { ip = "192.168.188.114"; };	
-  containers.kube15 = mkNode { ip = "192.168.188.115"; };	
-  containers.kube16 = mkNode { ip = "192.168.188.116"; };	
-  containers.kube17 = mkNode { ip = "192.168.188.117"; };	
-  containers.kube18 = mkNode { ip = "192.168.188.118"; };	
-  containers.kube19 = mkNode { ip = "192.168.188.119"; };	
-  containers.kube20 = mkNode { ip = "192.168.188.120"; };	
-  containers.kube21 = mkNode { ip = "192.168.188.121"; };	
-  containers.kube22 = mkNode { ip = "192.168.188.122"; };	
-  containers.kube23 = mkNode { ip = "192.168.188.123"; };	
-  containers.kube24 = mkNode { ip = "192.168.188.124"; };	
-  # containers.kube25 = mkNode { ip = "192.168.188.125"; };	
-  # containers.kube26 = mkNode { ip = "192.168.188.126"; };	
-  # containers.kube27 = mkNode { ip = "192.168.188.127"; };	
-  # containers.kube28 = mkNode { ip = "192.168.188.128"; };	
-  # containers.kube29 = mkNode { ip = "192.168.188.129"; };	
-  # containers.kube30 = mkNode { ip = "192.168.188.130"; };	
-  # containers.kube31 = mkNode { ip = "192.168.188.131"; };	
-  # containers.kube32 = mkNode { ip = "192.168.188.132"; };	
-  # containers.kube33 = mkNode { ip = "192.168.188.133"; };	
-  # containers.kube34 = mkNode { ip = "192.168.188.134"; };	
-  # containers.kube35 = mkNode { ip = "192.168.188.135"; };	
-  # containers.kube36 = mkNode { ip = "192.168.188.136"; };	
-  # containers.kube37 = mkNode { ip = "192.168.188.137"; };	
-  # containers.kube38 = mkNode { ip = "192.168.188.138"; };	
-  # containers.kube39 = mkNode { ip = "192.168.188.139"; };	
-  # containers.kube40 = mkNode { ip = "192.168.188.140"; };	
-  # containers.kube41 = mkNode { ip = "192.168.188.141"; };	
-  # containers.kube42 = mkNode { ip = "192.168.188.142"; };	
-  # containers.kube43 = mkNode { ip = "192.168.188.143"; };	
-  # containers.kube44 = mkNode { ip = "192.168.188.144"; };	
-  # containers.kube45 = mkNode { ip = "192.168.188.145"; };	
-  # containers.kube46 = mkNode { ip = "192.168.188.146"; };	
-  # containers.kube47 = mkNode { ip = "192.168.188.147"; };	
-  # containers.kube48 = mkNode { ip = "192.168.188.148"; };	
-  # containers.kube49 = mkNode { ip = "192.168.188.149"; };	
+  containers = lib.attrsets.mapAttrs' 
+    (name: value: lib.attrsets.nameValuePair name value) 
+    (builtins.listToAttrs kubeContainers);
 
+  ### Nexus
   services.nexus = {
     enable = true;
     # listenAddress = "0.0.0.0"; # to allow accessing over localnetwork
@@ -187,12 +170,12 @@ in
   # docker requires https for authenticated repos
   services.nginx = {
     enable = true;
-    
+
     recommendedProxySettings = true;
     recommendedTlsSettings = true;
     recommendedOptimisation= true;
 
-    # admin web interface available at localhost:8081
+    # admin web interface available over localhost
     virtualHosts."${kubeMasterHostname}" = {
       forceSSL = true;
       sslCertificate = certPath;
@@ -207,11 +190,13 @@ in
     };
   };
 
+  # self signed certificate for nexus
   security.pki.certificates = [ certfile ];	
 
+  ### Postgresql
   services.postgresql = {
     enable = true;
-    package = pkgs.postgresql_15;
+    package = pkgs.postgresql_16_jit;
     enableTCPIP = true;
     authentication = pkgs.lib.mkOverride 10 ''
       local all all trust
@@ -219,11 +204,20 @@ in
       host all all ::1/128 trust
       host all all fe80::/10 trust
       host all all ${kubeMasterGateway}/24 trust
-      host all all 10.42.0.1/24 trust
       host all all 100.64.0.0/10 trust
     '';
     initialScript = pkgs.writeText "backend-initScript" ''
       CREATE DATABASE slotdb;
     '';
+  };
+
+  ### Other
+  services.avahi = {
+    enable = true;
+    publish = {
+      enable = true;
+      addresses = true;
+      workstation = true;
+    };
   };
 }
