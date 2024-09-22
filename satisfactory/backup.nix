@@ -1,14 +1,17 @@
-{ pkgs, config, lib, ...}:
-
-let
-  saveDir = "${config.users.users.satisfactory.home}/.config/Epic/FactoryGame/Saved";
+{
+  pkgs,
+  config,
+  ...
+}: let
+  user = config.users.users.satisfactory;
+  saveDir = "${user.home}/.config/Epic/FactoryGame/Saved";
 in {
   deployment.keys.aws-secrets.text = builtins.readFile ./aws-secrets.key;
 
   systemd.services.saveGamesBackup = {
     serviceConfig = {
       EnvironmentFile = config.deployment.keys.aws-secrets.path;
-      User = "satisfactory";
+      User = user.name;
       Type = "oneshot";
       WorkingDirectory = saveDir;
     };
@@ -23,20 +26,20 @@ in {
   };
 
   systemd.timers.saveGamesBackup = {
-    wantedBy = [ "timers.target" ];
-    partOf = [ "saveGamesBackup.service" ];
+    wantedBy = ["timers.target"];
+    partOf = ["saveGamesBackup.service"];
     timerConfig.OnCalendar = "*-*-* 2:30:00";
     timerConfig.Persistent = true;
   };
 
   systemd.services."restoreSaveGamesBackup@" = {
-    conflicts = [ "satisfactory.service" ];
+    conflicts = ["satisfactory.service"];
     environment = {
       BACKUP_DATE = "%i";
     };
     serviceConfig = {
       EnvironmentFile = config.deployment.keys.aws-secrets.path;
-      User = "satisfactory";
+      User = user.name;
       Type = "oneshot";
       WorkingDirectory = saveDir;
     };
