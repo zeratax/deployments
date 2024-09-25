@@ -1,6 +1,5 @@
 {...}: {
   imports = [
-    import
     ./modules/satisfactory.nix
   ];
 
