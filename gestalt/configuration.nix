@@ -1,21 +1,26 @@
-{ config, pkgs, lib, ... }:
-let
-  nixos-unstable = import <nixos-unstable> { };
-in
 {
-  imports = [
-    ./modules/k3s.nix
+  config,
+  pkgs,
+  lib,
+  ...
+}: let
+  nixos-unstable = import <nixos-unstable> {};
+in {
+  imports =
+    [
+      ./modules/k3s.nix
 
-    # order is important. vfio must come before other gpu related kernel modules
-    ./hardware-configuration.nix
-    ./custom-hardware.nix
-    ./boot.nix
-  ] ++ lib.optionals (builtins.pathExists /etc/nixos/cachix) [ ./cachix.nix ];
+      # order is important. vfio must come before other gpu related kernel modules
+      ./hardware-configuration.nix
+      ./custom-hardware.nix
+      ./boot.nix
+    ]
+    ++ lib.optionals (builtins.pathExists /etc/nixos/cachix) [./cachix.nix];
 
   ################### Nix Configuration ###################
   nix = {
     package = pkgs.nixFlakes;
-    settings = { auto-optimise-store = true; };
+    settings = {auto-optimise-store = true;};
     gc = {
       automatic = true;
       dates = "weekly";
@@ -51,7 +56,7 @@ in
   networking.networkmanager.enable = true;
 
   # Add fritz box selfsigned cert
-  security.pki.certificates = [ (builtins.readFile ./certs/myFRITZBox.crt) ];
+  security.pki.certificates = [(builtins.readFile ./certs/myFRITZBox.crt)];
 
   ################### l10n ###################
   console = {
@@ -99,7 +104,7 @@ in
   users.users.jonaa = {
     isNormalUser = true;
     description = "Jona Abdinghoff";
-    extraGroups = [ "networkmanager" "wheel" "docker" "libvirtd" ];
+    extraGroups = ["networkmanager" "wheel" "docker" "libvirtd"];
     openssh.authorizedKeys.keys = [
       "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEA5K62E/ZFLEOIQmzKClxVAP5GmR+6ir+hWxPxK9XfvMZtTtCcnhXBnXNfQlSrX301INy9DiVfN+bRYHS3LU7TUfEcd6E5iwCOH6o9nRVZS7IkJDN/cw0m3co7cFeoayNZylIeACVfM7DwBjzzOXMV3T4hN5LbHkpv63CNTTTQqBaak+CZBQFmzMgIYGiEAi5a3yzZFpVh46JkaasDO2C9SfTNBIuCfaUIAbMbXb09B6FsirBdhndEI2fpT+1jYM0PUeqnxDbYuv5UDwDgKADo/HBAid1X4srJZzMjcnFjtwrazk3/DzyICnZM4R6xuw4cOYiDgfbfYsLYaT70YqFPUw=="
     ];
@@ -107,10 +112,9 @@ in
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs;
-    [
-      vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    ];
+  environment.systemPackages = with pkgs; [
+    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+  ];
 
   programs.gnupg.agent = {
     enable = true;
@@ -155,23 +159,18 @@ in
     pulse.enable = true;
     # If you want to use JACK applications, uncomment this
     #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
   # See https://nixos.wiki/wiki/Yubikey
-  services.udev.packages = [ pkgs.yubikey-personalization ];
+  services.udev.packages = [pkgs.yubikey-personalization];
 
   services.mullvad-vpn.enable = true;
-  networking.firewall.checkReversePath =
-    "loose"; # https://github.com/NixOS/nixpkgs/issues/113589
+  networking.firewall.checkReversePath = "loose"; # https://github.com/NixOS/nixpkgs/issues/113589
 
-  services.tailscale = { enable = true; };
+  services.tailscale = {enable = true;};
 
   services.transmission = {
     enable = false;
@@ -210,9 +209,13 @@ in
 
     kubeAgents = 6;
 
+    additionalPostgresqlAuthLines = [
+      "host all all 2001:9e8:df1d:3fc::/64 trust"
+    ];
+
     tokenFile = ./k3s-server-token.key;
-    certPath = ./certs/selfsigned.crt;
-    certKeyPath = ./certs/selfsigned.key;
+    certPath = ./certs/k3s.crt;
+    certKeyPath = ./certs/k3s.key;
 
     nexusProxyRepo.enable = true;
   };

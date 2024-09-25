@@ -1,5 +1,9 @@
-{ pkgs, lib, config, ... }:
-let
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}: let
   cfg = config.simulatedK3SCluster;
 
   # since we need this file to be visible at evaluation for host
@@ -8,31 +12,30 @@ let
   tokenFile = builtins.toPath cfg.tokenFile;
   certfile = builtins.readFile cfg.certPath;
 
-  subnet = builtins.head (builtins.match "([0-9]+\\.[0-9]+\\.[0-9]+)\\.[0-9]+"
-    cfg.kubeMasterGateway);
-
+  subnet =
+    builtins.head (builtins.match "([0-9]+\\.[0-9]+\\.[0-9]+)\\.[0-9]+"
+      cfg.kubeMasterGateway);
 
   kubeMasterMacVlanInterface = "mv-${cfg.kubeMasterInterface}";
-  kubeMasterMacVlanHostInterface =
-      "${kubeMasterMacVlanInterface}-host";
+  kubeMasterMacVlanHostInterface = "${kubeMasterMacVlanInterface}-host";
 
-  kubeContainers = map (idx:
-    let ipEnding = 100 + idx;
-    in lib.attrsets.nameValuePair ("kube${toString idx}")
-    (mkNode { ip = "${subnet}.${toString ipEnding}"; }))
-    (lib.lists.range 1 cfg.kubeAgents);
+  kubeContainers = map (idx: let
+    ipEnding = 100 + idx;
+  in
+    lib.attrsets.nameValuePair "kube${toString idx}"
+    (mkNode {ip = "${subnet}.${toString ipEnding}";}))
+  (lib.lists.range 1 cfg.kubeAgents);
 
-  mkNode = { ip }: {
+  mkNode = {ip}: {
     # use macvlan
     autoStart = true;
-    macvlans = [ cfg.kubeMasterInterface ];
+    macvlans = [cfg.kubeMasterInterface];
     timeoutStartSec = "10min";
 
     # enable nested containers https://wiki.archlinux.org/title/systemd-nspawn#Run_docker_in_systemd-nspawn
     enableTun = true;
-    extraFlags = [ "--private-users-ownership=chown" ];
-    additionalCapabilities =
-      [ ''all" --system-call-filter="add_key keyctl bpf" --capability="all'' ];
+    extraFlags = ["--private-users-ownership=chown"];
+    additionalCapabilities = [''all" --system-call-filter="add_key keyctl bpf" --capability="all''];
 
     allowedDevices = [
       {
@@ -71,7 +74,7 @@ let
       };
     };
 
-    config = { config, pkgs, ... }: {
+    config = {config, ...}: {
       # resolve host
       networking = {
         extraHosts = ''
@@ -79,10 +82,12 @@ let
         '';
         defaultGateway = cfg.kubeMasterGateway;
         interfaces = {
-          "${kubeMasterMacVlanInterface}".ipv4.addresses = [{
-            address = ip;
-            prefixLength = 24;
-          }];
+          "${kubeMasterMacVlanInterface}".ipv4.addresses = [
+            {
+              address = ip;
+              prefixLength = 24;
+            }
+          ];
         };
         firewall = {
           enable = true;
@@ -94,18 +99,18 @@ let
       };
 
       # self signed certificate for nexus
-      security.pki.certificates = [ certfile ];
+      security.pki.certificates = [certfile];
 
       services.k3s = {
         inherit tokenFile;
         enable = true;
         role = "agent";
         serverAddr = "https://${cfg.kubeMasterHostname}:${
-            toString cfg.kubeMasterAPIServerPort
-          }";
+          toString cfg.kubeMasterAPIServerPort
+        }";
         extraFlags = "--node-ip ${
-            toString ip
-          }"; # --container-runtime-endpoint unix:///run/containerd/containerd.sock";
+          toString ip
+        }"; # --container-runtime-endpoint unix:///run/containerd/containerd.sock";
       };
 
       services.avahi = {
@@ -127,7 +132,7 @@ let
 in {
   options = {
     simulatedK3SCluster = {
-      enable = lib.mkEnableOption "Enable the simulated k3s Cluster";  
+      enable = lib.mkEnableOption "Enable the simulated k3s Cluster";
 
       kubeMasterIP = lib.mkOption {
         type = lib.types.str;
@@ -163,6 +168,12 @@ in {
         type = lib.types.int;
         default = 1;
         description = "Number of Kubernetes agents.";
+      };
+
+      additionalPostgresqlAuthLines = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [];
+        description = "Additional lines to add to PostgreSQL authentication configuration.";
       };
 
       nexusProxyRepo = {
@@ -204,11 +215,13 @@ in {
         mode = "bridge";
       };
       interfaces = {
-        "${cfg.kubeMasterInterface}".ipv4.addresses = lib.mkForce [ ];
-        "${kubeMasterMacVlanHostInterface}".ipv4.addresses = [{
-          address = cfg.kubeMasterIP;
-          prefixLength = 24;
-        }];
+        "${cfg.kubeMasterInterface}".ipv4.addresses = lib.mkForce [];
+        "${kubeMasterMacVlanHostInterface}".ipv4.addresses = [
+          {
+            address = cfg.kubeMasterIP;
+            prefixLength = 24;
+          }
+        ];
       };
 
       extraHosts = ''
@@ -218,7 +231,7 @@ in {
       firewall = {
         enable = true;
         allowedTCPPorts =
-          [ config.services.postgresql.settings.port cfg.kubeMasterAPIServerPort ]
+          [config.services.postgresql.settings.port cfg.kubeMasterAPIServerPort]
           ++ lib.lists.optionals cfg.nexusProxyRepo.enable [
             config.services.nginx.defaultSSLListenPort
             # config.services.nexus.listenPort # to allow accessing over localnetwork
@@ -232,11 +245,11 @@ in {
       inherit tokenFile;
       enable = true;
       role = "server";
-      extraFlags =
-        "--disable traefik --flannel-backend=host-gw"; # --container-runtime-endpoint unix:///run/containerd/containerd.sock";
+      extraFlags = "--disable traefik --flannel-backend=host-gw"; # --container-runtime-endpoint unix:///run/containerd/containerd.sock";
     };
 
-    containers = lib.attrsets.mapAttrs'
+    containers =
+      lib.attrsets.mapAttrs'
       (name: value: lib.attrsets.nameValuePair name value)
       (builtins.listToAttrs kubeContainers);
 
@@ -262,8 +275,8 @@ in {
 
         locations."/" = {
           proxyPass = "http://${config.services.nexus.listenAddress}:${
-              toString cfg.nexusProxyRepo.port
-            }";
+            toString cfg.nexusProxyRepo.port
+          }";
           extraConfig = ''
             proxy_pass_header Authorization;
           '';
@@ -272,7 +285,7 @@ in {
     };
 
     # self signed certificate for nexus
-    security.pki.certificates = [ certfile ];
+    security.pki.certificates = [certfile];
 
     ### Postgresql
     services.postgresql = {
@@ -286,6 +299,7 @@ in {
         host all all fe80::/10 trust
         host all all ${cfg.kubeMasterGateway}/24 trust
         host all all 100.64.0.0/10 trust
+        ${lib.concatStringsSep "\n" cfg.additionalPostgresqlAuthLines}
       '';
       initialScript = pkgs.writeText "backend-initScript" ''
         CREATE DATABASE slotdb;

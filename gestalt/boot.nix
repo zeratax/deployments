@@ -1,6 +1,7 @@
-{ config, pkgs, ... }:
-
 {
+  config,
+  ...
+}: {
   imports = [
     ./modules/pci-passthrough.nix
     ./modules/virtualisation.nix
@@ -26,8 +27,13 @@
   };
 
   security.pam.loginLimits = [
-      {domain = "*";type = "-";item = "memlock";value = "infinity";}
-      # {domain = "${config.users.users.jonaa.name}";type = "-";item = "memlock";value = "infinity";}
+    {
+      domain = "*";
+      type = "-";
+      item = "memlock";
+      value = "infinity";
+    }
+    # {domain = "${config.users.users.jonaa.name}";type = "-";item = "memlock";value = "infinity";}
   ];
 
   boot = {
@@ -56,8 +62,7 @@
         efiSysMountPoint = "/boot";
       };
     };
-    extraModprobeConfig =
-      "options kvm_intel nested=1"; # allow nested virtualization
-    supportedFilesystems = [ "ntfs" ];
+    extraModprobeConfig = "options kvm_intel nested=1"; # allow nested virtualization
+    supportedFilesystems = ["ntfs"];
   };
 }
