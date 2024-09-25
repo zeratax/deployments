@@ -1,20 +1,15 @@
-{ lib, ... }: {
-  networking = {
-    nameservers = [ "1.1.1.1" ];
-    defaultGateway = "172.31.1.1";
-    defaultGateway6 = "fe80::1";
-    dhcpcd.enable = false;
-    usePredictableInterfaceNames = lib.mkForce true;
-    interfaces = {
-      ens3 = {
-        ipv4.addresses = [
-          { address="49.12.106.164"; prefixLength=16; }
-        ];
-        ipv6.addresses = [
-          { address="2a01:4f8:c17:d8db::2"; prefixLength=64; }
-        ];
-      };
-      ens10.useDHCP = true;
-    };
+# see https://nixos.wiki/wiki/Install_NixOS_on_Hetzner_Cloud#Network_configuration
+{...}: {
+  systemd.network.enable = true;
+  systemd.network.networks."10-wan" = {
+    matchConfig.Name = "ens3"; # either ens3 or enp1s0 depending on system, check 'ip addr'
+    networkConfig.DHCP = "ipv4";
+    address = [
+      # replace this address with the one assigned to your instance
+      "2a01:4f8:c17:d8db::/64"
+    ];
+    routes = [
+      {routeConfig.Gateway = "fe80::1";}
+    ];
   };
 }
