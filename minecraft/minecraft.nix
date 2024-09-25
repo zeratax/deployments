@@ -1,33 +1,36 @@
-{ pkgs, config, lib, ... }:
-let
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}: let
   nur-pkgs = import (builtins.fetchTarball
     "https://github.com/nix-community/NUR/archive/master.tar.gz") {
-      inherit pkgs;
-      repoOverrides = { }
-        // lib.optionalAttrs (builtins.pathExists ~/git/nur-packages) {
-          zeratax = import ~/git/nur-packages { };
-        };
-    };
+    inherit pkgs;
+    repoOverrides =
+      {}
+      // lib.optionalAttrs (builtins.pathExists ~/git/nur-packages) {
+        zeratax = import ~/git/nur-packages {};
+      };
+  };
 
   # plugins = config.services.bukkit-plugins.plugins;
   # dynmap-defaults = import ./plugin-settings/dynmap.nix { };
   # discordsrv-defaults = import ./plugin-settings/discordsrv.nix { };
-  paper-defaults = import ./plugin-settings/paper.nix { };
-  paper-tweaks-defaults = import ./plugin-settings/paper-tweaks.nix { };
+  paper-defaults = import ./plugin-settings/paper.nix {};
+  paper-tweaks-defaults = import ./plugin-settings/paper-tweaks.nix {};
 
   newpapermc = pkgs.papermc.overrideAttrs (old: rec {
-    version = "1.20.4.328";
-    # url is wrong in nixpkgs
+    version = "1.21.1.99";
     src = let
       mcVersion = lib.versions.pad 3 version;
       buildNum = builtins.elemAt (lib.splitVersion version) 3;
-    in pkgs.fetchurl {
-      url =
-        "https://api.papermc.io/v2/projects/paper/versions/${mcVersion}/builds/${buildNum}/downloads/paper-${mcVersion}-${buildNum}.jar";
-      sha256 = "sha256-wpyu8SONCDhrcFcBV8smkJ+/s6wyYtVCNPzLZt+5aQM=";
-    };
+    in
+      pkgs.fetchurl {
+        url = "https://api.papermc.io/v2/projects/paper/versions/${mcVersion}/builds/${buildNum}/downloads/paper-${mcVersion}-${buildNum}.jar";
+        sha256 = "0z73v368ya4m9avh7jgvvxvicl278fmirs6q1wkwzc9aisk963x0";
+      };
   });
-
 in {
   imports = [
     nur-pkgs.repos.zeratax.modules.bukkit-plugins
@@ -101,8 +104,7 @@ in {
 
       # resource-pack = "https://cloud.dmnd.sh/s/q3P9FwKew3QRkbJ/download?path=%2F&files=John%20Smith%20Legacy%20JSC%201.20.2%20v6.zip";
       # resource-pack-sha1 = "B04757FF80268FC144996EE16EC214FB330AE276";
-      resource-pack =
-        "https://cloud.dmnd.sh/s/q3P9FwKew3QRkbJ/download?path=%2F&files=dmnd-v1.0.zip";
+      resource-pack = "https://cloud.dmnd.sh/s/q3P9FwKew3QRkbJ/download?path=%2F&files=dmnd-v1.0.zip";
       resource-pack-sha1 = "60E6E7B821BD580BA09A50C9700DA4893143E232";
       require-resource-pack = true;
     };
@@ -122,16 +124,16 @@ in {
     plugins = {
       bluemap = {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.bluemap;
-        settings = { };
+        settings = {};
       };
       bluemap-marker-manager = {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.bluemap-marker-manager;
-        settings = { };
+        settings = {};
       };
       bluemap-offline-player-markers = {
         package =
           nur-pkgs.repos.zeratax.bukkitPlugins.bluemap-offline-player-markers;
-        settings = { };
+        settings = {};
       };
       paper-tweaks = {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.paper-tweaks;
@@ -179,14 +181,14 @@ in {
       # };
       simple-voice-chat = {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.simple-voice-chat;
-        settings = { };
+        settings = {};
       };
     };
   };
 
   # open ports to host e.g. a dynmap
   networking.firewall = {
-    allowedTCPPorts = [ 80 443 ];
+    allowedTCPPorts = [80 443];
     allowedUDPPorts = [
       24454
     ]; # for simple voice chat https://modrepo.de/minecraft/voicechat/wiki/server_setup_self_hosted
