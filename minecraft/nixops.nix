@@ -6,6 +6,7 @@
   };
   minecraft = {config, ...}: {
     deployment.targetHost = "mc.dmnd.sh";
+    nixpkgs.hostPlatform = "aarch64-linux";
 
     imports = [
       ../providers/hetzner.nix
