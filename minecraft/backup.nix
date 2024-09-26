@@ -1,7 +1,9 @@
-{ pkgs, config, ... }:
-let
-  nixos-unstable = import <nixos-unstable> { };
-
+{
+  pkgs,
+  config,
+  ...
+}: let
+  # nixos-unstable = import <nixos-unstable> {};
   mc-server = config.services.bukkit-server;
   mc-settings = mc-server.serverProperties;
   mc-dir = mc-server.dataDir;
@@ -41,17 +43,23 @@ let
       name = "skyrim";
       isDefaultLevelType = true;
     }
+    {
+      name = "longlegs";
+      isDefaultLevelType = true;
+    }
   ];
 
-  makePaths = world:
-    let
-      base = [ "${mc-dir}/${world.name}/" ];
-      extraPaths = if world.isDefaultLevelType then [
+  makePaths = world: let
+    base = ["${mc-dir}/${world.name}/"];
+    extraPaths =
+      if world.isDefaultLevelType
+      then [
         "${mc-dir}/${world.name}_nether/"
         "${mc-dir}/${world.name}_the_end/"
-      ] else
-        [ ];
-    in base ++ extraPaths;
+      ]
+      else [];
+  in
+    base ++ extraPaths;
 
   worldPaths = builtins.concatLists (builtins.map makePaths mcWorlds);
 in {
@@ -73,17 +81,19 @@ in {
   };
 
   # restic seems to be broken with s3 in 23.05
-  nixpkgs.config.packageOverrides = pkgs: { restic = nixos-unstable.restic; };
+  # nixpkgs.config.packageOverrides = pkgs: { restic = nixos-unstable.restic; };
 
   services.restic.backups = {
     mc-worlds = {
-      paths = worldPaths ++ [
-        "${mc-dir}/bluemap/web/assets/*.png"
-        "${mc-dir}/ops.json"
-        "${mc-dir}/plugins/BlueMap/"
-        "${mc-dir}/plugins/PaperTweaks/sqlite.db"
-        "${mc-dir}/plugins/PaperTweaks/mv.db"
-      ];
+      paths =
+        worldPaths
+        ++ [
+          "${mc-dir}/bluemap/web/assets/*.png"
+          "${mc-dir}/ops.json"
+          "${mc-dir}/plugins/BlueMap/"
+          "${mc-dir}/plugins/PaperTweaks/sqlite.db"
+          "${mc-dir}/plugins/PaperTweaks/mv.db"
+        ];
 
       timerConfig = {
         OnCalendar = "*-*-* 3:30:00";
@@ -99,7 +109,7 @@ in {
   };
 
   systemd.services.restic-backups-mc-worlds = {
-    onFailure = [ "worldBackupFailure.service" ];
+    onFailure = ["worldBackupFailure.service"];
     preStart = ''
       ${rcon} <<EOS
         say Creating backup...
@@ -117,7 +127,7 @@ in {
 
   systemd.services."restoreBackup@" = {
     description = "Restore to a specific Restic Snapshot";
-    conflicts = [ "bukkit-server.service" ];
+    conflicts = ["bukkit-server.service"];
     environment = {
       SNAPSHOT_ID = "%i";
       RESTIC_REPOSITORY = config.services.restic.backups.mc-worlds.repository;

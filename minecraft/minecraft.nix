@@ -73,7 +73,7 @@ in {
 
     serverProperties = {
       server-name = "DIAMONDS";
-      level-name = "skyrim";
+      level-name = "longlegs";
       level-type = "default";
       motd = "a weak diamond is no diamond at all";
 
@@ -137,17 +137,7 @@ in {
       };
       paper-tweaks = {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.paper-tweaks;
-        # TODO: Should probably just be stateful and backuped
-        settings = lib.recursiveUpdate paper-tweaks-defaults {
-          "PaperTweaks/modules.yml" = {
-            survival = {
-              afk-display = true;
-              coordinates-hud = true;
-              graves = true;
-              track-raw-stats = true;
-            };
-          };
-        };
+        settings = {};
       };
       # discordsrv = {
       #   package = newdiscordsrv; #nur-pkgs.repos.zeratax.bukkitPlugins.discordsrv;
