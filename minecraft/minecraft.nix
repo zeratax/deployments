@@ -17,8 +17,8 @@
   # plugins = config.services.bukkit-plugins.plugins;
   # dynmap-defaults = import ./plugin-settings/dynmap.nix { };
   # discordsrv-defaults = import ./plugin-settings/discordsrv.nix { };
+  # paper-tweaks-defaults = import ./plugin-settings/paper-tweaks.nix {};
   paper-defaults = import ./plugin-settings/paper.nix {};
-  paper-tweaks-defaults = import ./plugin-settings/paper-tweaks.nix {};
 
   newpapermc = pkgs.papermc.overrideAttrs (old: rec {
     version = "1.21.1.99";
