@@ -151,36 +151,6 @@ in {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.custom-discs;
         settings = {};
       };
-      # discordsrv = {
-      #   package = newdiscordsrv; #nur-pkgs.repos.zeratax.bukkitPlugins.discordsrv;
-      #   settings = lib.recursiveUpdate discordsrv-defaults {
-      #     "DiscordSRV/config.yml" = {
-      #       BotToken = builtins.readFile ./bot-token.key;
-      #       AvatarUrl = "https://crafatar.com/renders/head/{uuid-nodashes}.png?size={size}&overlay#{texture}";
-      #       Channels = {
-      #         global = "901949237162541107";
-      #       };
-      #       DiscordCannedResponses = {
-      #         "!ip" = config.networking.domain;
-      #         "!site" = "http://dmnd.sh";
-      #       };
-      #       Experiment_WebhookChatMessageDelivery = true;
-      #       UseModernPaperChatEvent = true;
-      #       DiscordChatChannelRolesAllowedToUseColorCodesInChat = [
-      #         "Gems"
-      #       ];
-      #       ChannelTopicUpdaterChannelTopicsAtShutdownEnabled = false;
-      #       DiscordInviteLink = "https://discord.gg/MVYe49X";
-      #       EnablePresenceInformation = true;
-      #     };
-      #   };
-      # };
-      # dynmap = {
-      #   package = newdynmap; #nur-pkgs.repos.zeratax.bukkitPlugins.dynmap;
-      #   settings = lib.recursiveUpdate dynmap-defaults {
-      #     # overwrite defaults here
-      #   };
-      # };
       simple-voice-chat = {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.simple-voice-chat;
         settings = {};
