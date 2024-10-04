@@ -139,6 +139,18 @@ in {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.paper-tweaks;
         settings = {};
       };
+      voicechat-interactions-paper = {
+        package = nur-pkgs.repos.zeratax.bukkitPlugins.voicechat-interactions-paper;
+        settings = {};
+      };
+      protocol-lib = {
+        package = nur-pkgs.repos.zeratax.bukkitPlugins.protocol-lib;
+        settings = {};
+      };
+      custom-discs = {
+        package = nur-pkgs.repos.zeratax.bukkitPlugins.custom-discs;
+        settings = {};
+      };
       # discordsrv = {
       #   package = newdiscordsrv; #nur-pkgs.repos.zeratax.bukkitPlugins.discordsrv;
       #   settings = lib.recursiveUpdate discordsrv-defaults {
