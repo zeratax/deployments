@@ -104,6 +104,7 @@ in {
         User = "satisfactory";
         Group = "satisfactory";
         WorkingDirectory = "/var/lib/satisfactory";
+        TimeoutStartSec = "600";
       };
       environment = {
         LD_LIBRARY_PATH = "SatisfactoryDedicatedServer/linux64:SatisfactoryDedicatedServer/Engine/Binaries/Linux:SatisfactoryDedicatedServer/Engine/Binaries/ThirdParty/PhysX3/Linux/x86_64-unknown-linux-gnu";
