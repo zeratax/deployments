@@ -155,6 +155,10 @@ in {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.simple-voice-chat;
         settings = {};
       };
+      vivecraft = {
+        package = nur-pkgs.repos.zeratax.bukkitPlugins.vivecraft;
+        settings = {};
+      };
     };
   };
 
