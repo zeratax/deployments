@@ -1,5 +1,9 @@
-  { pkgs, config, lib, ... }:
 {
+  pkgs,
+  config,
+  lib,
+  ...
+}: {
   deployment.keys.smtp-pass = {
     text = builtins.readFile ./smtp-pass.key;
     group = config.users.groups.nextcloud.name;
@@ -14,9 +18,11 @@
 
   services.davfs2 = {
     enable = true;
-    extraConfig = ''
-      cache_size 8192
-    '';
+    settings = {
+      globalSection = {
+        cache_size = 16384;
+      };
+    };
   };
 
   # manually setting these, so we can use them below. otherwise these are autoallocated...
@@ -31,7 +37,7 @@
       "uid=${toString config.users.groups.nextcloud.gid}"
       "nofail" # if i can't boot i can't fix stuff
       "dir_mode=0770"
-      "_netdev" # device requires network 
+      "_netdev" # device requires network
     ];
   };
 
@@ -45,10 +51,10 @@
     user = config.users.users.nextcloud.name;
     group = config.users.groups.nextcloud.name;
   };
-  users.users.nextcloud.extraGroups = [ config.users.groups.keys.name ];
+  users.users.nextcloud.extraGroups = [config.users.groups.keys.name];
 
   networking.firewall = {
-    allowedTCPPorts = [ 80 443 ];
+    allowedTCPPorts = [80 443];
     allowPing = true;
   };
 
@@ -167,7 +173,7 @@
     package = pkgs.postgresql_16;
 
     # Ensure the database, user, and permissions always exist
-    ensureDatabases = [ "nextcloud" ];
+    ensureDatabases = ["nextcloud"];
     ensureUsers = [
       {
         name = "nextcloud";
