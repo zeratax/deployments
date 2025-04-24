@@ -1,9 +1,14 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   deployment.keys.envFile.text = builtins.readFile ./environment.key;
 
   services.remote-bot = {
     enable = true;
     environmentFile = config.deployment.keys.envFile.path;
+    debtGameImages = lib.filesystem.listFilesRecursive ./debt_game;
     settings = {
       recipient_email = "mail@zera.tax";
       sender_domain = "dmnd.sh";
@@ -28,7 +33,7 @@
       enableACME = true;
 
       locations."/" = {
-        proxyPass = "http://localhost:8000/";
+        proxyPass = "http://localhost:${toString config.services.remote-bot.port}/";
       };
     };
   };

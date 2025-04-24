@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-24.05";
+    nixpkgs.url = "nixpkgs/nixos-24.11";
     flake-utils.url = "github:numtide/flake-utils";
     nixops = {
       url = "github:NixOS/nixops";
@@ -8,7 +8,6 @@
     };
     remote-bot = {
       url = "github:zeratax/remote-bot";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
