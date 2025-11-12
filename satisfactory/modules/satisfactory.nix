@@ -59,14 +59,14 @@ in {
 
     networking = {
       firewall = {
-        allowedUDPPorts = [15777 15000 7777 27015];
+        allowedUDPPorts = [15777 15000 7777 8888 27015];
         allowedUDPPortRanges = [
           {
             from = 27031;
             to = 27036;
           }
         ];
-        allowedTCPPorts = [7777 27015 27036];
+        allowedTCPPorts = [7777 8888 27015 27036];
       };
     };
 
