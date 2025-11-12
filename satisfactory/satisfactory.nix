@@ -8,5 +8,6 @@
     address = "0.0.0.0";
     maxPlayers = 10;
     autoPause = true;
+    beta = "experimental";
   };
 }
