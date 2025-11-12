@@ -21,14 +21,14 @@
   paper-defaults = import ./plugin-settings/paper.nix {};
 
   newpapermc = pkgs.papermc.overrideAttrs (old: rec {
-    version = "1.21.1.99";
+    version = "1.21.10.108";
     src = let
       mcVersion = lib.versions.pad 3 version;
       buildNum = builtins.elemAt (lib.splitVersion version) 3;
     in
       pkgs.fetchurl {
         url = "https://api.papermc.io/v2/projects/paper/versions/${mcVersion}/builds/${buildNum}/downloads/paper-${mcVersion}-${buildNum}.jar";
-        sha256 = "0z73v368ya4m9avh7jgvvxvicl278fmirs6q1wkwzc9aisk963x0";
+        sha256 = "0dhbvlxlyrcsyn61cngrnax7xvngvgqgxbgizcgdp5vqwkdmv0ic";
       };
   });
 in {
