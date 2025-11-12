@@ -88,7 +88,7 @@
 
     package = pkgs.nextcloud31;
 
-    maxUploadSize = "10G";
+    maxUploadSize = "50G";
 
     configureRedis = true;
     config = {
