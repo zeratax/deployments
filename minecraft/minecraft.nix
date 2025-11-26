@@ -73,7 +73,7 @@ in {
 
     serverProperties = {
       server-name = "DIAMONDS";
-      level-name = "longlegs";
+      level-name = "La Macha";
       level-type = "default";
       motd = "a weak diamond is no diamond at all";
 
@@ -104,8 +104,10 @@ in {
 
       # resource-pack = "https://cloud.dmnd.sh/s/q3P9FwKew3QRkbJ/download?path=%2F&files=John%20Smith%20Legacy%20JSC%201.20.2%20v6.zip";
       # resource-pack-sha1 = "B04757FF80268FC144996EE16EC214FB330AE276";
-      resource-pack = "https://cloud.dmnd.sh/s/q3P9FwKew3QRkbJ/download?path=%2F&files=dmnd-v1.0.zip";
-      resource-pack-sha1 = "60E6E7B821BD580BA09A50C9700DA4893143E232";
+      # resource-pack = "https://cloud.dmnd.sh/s/q3P9FwKew3QRkbJ/download?path=%2F&files=dmnd-v1.0.zip";
+      # resource-pack-sha1 = "60E6E7B821BD580BA09A50C9700DA4893143E232";
+      resource-pack = "https://github.com/LunarEclipseStudios/From-The-Fog/releases/download/v1.11.2-1.21.10/From-The-Fog-Data-Resource-Pack-1.21.9-1.21.10-v1.11.2.zip";
+      resource-pack-sha1 = "9p139kc2wjkzlpq3z2s3g23557314alw";
       require-resource-pack = true;
     };
 
