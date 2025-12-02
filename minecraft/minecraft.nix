@@ -39,6 +39,18 @@ in {
   services.bukkit-server = {
     enable = true;
     declarative = true;
+
+    whitelist = {
+      CatsCrossing = "1db3a01f-edb1-4760-b221-ce64d2645c69";
+      LorgeBee = "bf552ef4-b24b-47dc-b410-7d14e60a5454";
+      Cadsnaper2002 = "9d00dedf-ddff-40b3-aa5d-0a56f93bfdb3";
+      zeratax = "d93bfa80-ca4d-430e-ba93-d42a48e1e124";
+      PJLobsterman = "49e4dd2f-b793-49a4-b4cc-b0f18dde6c14";
+      _thomas123 = "ea040fb0-bc45-4608-bd36-83c78c5dfde7";
+      GRANGLES = "28a56111-c236-40f2-968a-52a49c8e06e3";
+      LargestBee = "b483b602-95e3-4701-b15a-5c603da0a172";
+    };
+
     eula = true;
     openFirewall = true;
     package = newpapermc;
