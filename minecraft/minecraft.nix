@@ -73,6 +73,7 @@ in {
 
     serverProperties = {
       server-name = "DIAMONDS";
+      # when changing this remember to also update ./backup.nix
       level-name = "La Macha";
       level-type = "default";
       motd = "a weak diamond is no diamond at all";

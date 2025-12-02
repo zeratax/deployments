@@ -47,6 +47,10 @@
       name = "longlegs";
       isDefaultLevelType = true;
     }
+    {
+      name = "La Macha";
+      isDefaultLevelType = true;
+    }
   ];
 
   makePaths = world: let
