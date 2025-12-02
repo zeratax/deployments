@@ -90,6 +90,7 @@ in {
 
       enable-query = true;
       enable-rcon = true;
+      enable-status = true;
       "rcon.port" = 25575;
       "rcon.password" =
         lib.removeSuffix "\n" (builtins.readFile ./rcon-password.key);
