@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-24.05";
+    nixpkgs.url = "nixpkgs/nixos-24.11";
     flake-utils.url = "github:numtide/flake-utils";
     nixops.url = "github:NixOS/nixops";
     nixops.inputs.nixpkgs.follows = "nixpkgs";
@@ -32,6 +32,7 @@
       devShell = pkgs.mkShell {
         buildInputs = [
           nixops_with_plugins
+          pkgs.git-agecrypt
         ];
         NIXOPS_STATE = "./statefile/deployments.nixops";
       };
