@@ -1,6 +1,6 @@
-secretfile filter=git-agecrypt diff=git-agecrypt
-*.key filter=git-agecrypt diff=git-agecrypt
-*.pem filter=git-agecrypt diff=git-agecrypt
-*.jpg filter=git-agecrypt diff=git-agecrypt
-secretdir/** filter=git-agecrypt diff=git-agecrypt
-*/statefile/** filter=git-agecrypt diff=git-agecrypt
+secretfile filter=strongbox diff=strongbox merge=strongbox
+*.key filter=strongbox diff=strongbox merge=strongbox
+*.pem filter=strongbox diff=strongbox merge=strongbox
+*.jpg filter=strongbox diff=strongbox merge=strongbox
+secretdir/** filter=strongbox diff=strongbox merge=strongbox
+*/statefile/** filter=strongbox diff=strongbox merge=strongbox

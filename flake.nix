@@ -28,13 +28,31 @@
       nixops_with_plugins =
         nixops_unstable_minimal.withPlugins
         (ps: []);
+      strongbox = pkgs.stdenv.mkDerivation rec {
+        pname = "strongbox";
+        version = "2.1.0";
+        src = pkgs.fetchurl {
+          url = "https://github.com/uw-labs/strongbox/releases/download/v${version}/strongbox_${version}_linux_amd64";
+          sha256 = "13g54jlpi134lsvx8lvznx2cpbprxip1wxcwmdans6ifsd9v0zgs";
+        };
+        dontUnpack = true;
+        installPhase = ''
+          mkdir -p $out/bin
+          cp $src $out/bin/strongbox
+          chmod +x $out/bin/strongbox
+        '';
+      };
     in {
       devShell = pkgs.mkShell {
         buildInputs = [
           nixops_with_plugins
-          pkgs.git-agecrypt
+          strongbox
+          pkgs.age
         ];
         NIXOPS_STATE = "./statefile/deployments.nixops";
+        shellHook = ''
+          strongbox -git-config
+        '';
       };
 
       formatter = nixpkgs.legacyPackages.${system}.alejandra;
