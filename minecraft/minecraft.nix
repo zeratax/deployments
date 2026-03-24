@@ -21,14 +21,14 @@
   paper-defaults = import ./plugin-settings/paper.nix {};
 
   newpapermc = pkgs.papermc.overrideAttrs (old: rec {
-    version = "1.21.10.108";
+    version = "1.21.11.69";
     src = let
       mcVersion = lib.versions.pad 3 version;
       buildNum = builtins.elemAt (lib.splitVersion version) 3;
     in
       pkgs.fetchurl {
         url = "https://api.papermc.io/v2/projects/paper/versions/${mcVersion}/builds/${buildNum}/downloads/paper-${mcVersion}-${buildNum}.jar";
-        sha256 = "0dhbvlxlyrcsyn61cngrnax7xvngvgqgxbgizcgdp5vqwkdmv0ic";
+        sha256 = "1blgrg16yg5iwfain4vlqn8v1g3s59r7pws3ag3zq7fpz4m4ydyg";
       };
   });
 in {
@@ -159,8 +159,8 @@ in {
         package = nur-pkgs.repos.zeratax.bukkitPlugins.voicechat-interactions-paper;
         settings = {};
       };
-      protocol-lib = {
-        package = nur-pkgs.repos.zeratax.bukkitPlugins.protocol-lib;
+      packet-events = {
+        package = nur-pkgs.repos.zeratax.bukkitPlugins.packet-events;
         settings = {};
       };
       custom-discs = {
